@@ -4,13 +4,9 @@ const dotenv = require("dotenv");
 
 const projectRoot = path.resolve(__dirname, "..");
 const envPath = path.join(projectRoot, ".env");
-if (!fs.existsSync(envPath)) {
-    throw new Error("Missing .env. Copy .env.example to .env and set TMDB_ACCESS_TOKEN.");
-}
-
-dotenv.config({ path: envPath });
+if (fs.existsSync(envPath)) dotenv.config({ path: envPath });
 const token = process.env.TMDB_ACCESS_TOKEN?.trim();
-if (!token) throw new Error("TMDB_ACCESS_TOKEN is missing from .env.");
+if (!token) throw new Error("TMDB_ACCESS_TOKEN is missing. Set it in .env or the deployment environment.");
 
 const generatedConfig = `export const TMDB_ACCESS_TOKEN = ${JSON.stringify(token)};\n`;
 const outputPaths = [
