@@ -1,0 +1,21 @@
+# Local credentials and generated app config
+.env
+.env.*
+!.env.example
+/copy/
+/Player/
+www/js/config.js
+android/app/src/main/assets/public/js/config.js
+
+# Dependencies and build output
+node_modules/
+android/.gradle/
+android/local.properties
+android/**/build/
+android/.idea/
+android/capacitor-cordova-android-plugins/build/
+
+# Local machine files
+.DS_Store
+Thumbs.db
+*.log
