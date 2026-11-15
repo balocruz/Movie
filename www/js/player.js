@@ -14,8 +14,8 @@ export function createPlayer({ onHistoryChange }) {
     let selectedType = "movie";
 
     const servers = [
-        ["superembed", "Server 1 (NioMovies / Fast)"],
-        ["vidsrccc", "Server 2 (VidSrc.cc)"],
+        ["superembed", "Server 1 (SuperEmbed)"],
+        ["videasy", "Server 2 (Videasy)"],
         ["vidlink", "Server 3 (VidLink)"],
         ["smashystream", "Server 4 (SmashyStream)"],
         ["multiembed", "Server 5 (MultiEmbed)"],
@@ -188,16 +188,16 @@ export function createPlayer({ onHistoryChange }) {
         const id = selectedItem.id;
 
         if (selectedType === "tv") {
-            if (server === "superembed") video.src = `https://multiembed.mov/directstream.php?video_id=${id}&tmdb=1&s=${season}&e=${episode}`;
-            else if (server === "vidsrccc") video.src = `https://vidsrc.cc/v2/embed/tv/${id}/${season}/${episode}`;
+            if (server === "superembed") video.src = `https://multiembed.mov/?video_id=${id}&tmdb=1&s=${season}&e=${episode}`;
+            else if (server === "videasy") video.src = `https://player.videasy.net/tv/${id}/${season}/${episode}`;
             else if (server === "vidlink") video.src = `https://vidlink.pro/tv/${id}/${season}/${episode}`;
             else if (server === "smashystream") video.src = `https://embed.smashystream.com/playere.php?tmdb=${id}&season=${season}&episode=${episode}`;
             else if (server === "multiembed") video.src = `https://multiembed.mov/?video_id=${id}&tmdb=1&s=${season}&e=${episode}`;
             else if (server === "vidsrc") video.src = `https://vidsrc.me/embed/tv?tmdb=${id}&season=${season}&episode=${episode}`;
             else video.src = `https://www.2embed.cc/embedtv/${id}?s=${season}&e=${episode}`;
         } else {
-            if (server === "superembed") video.src = `https://multiembed.mov/directstream.php?video_id=${id}&tmdb=1`;
-            else if (server === "vidsrccc") video.src = `https://vidsrc.cc/v2/embed/movie/${id}`;
+            if (server === "superembed") video.src = `https://multiembed.mov/?video_id=${id}&tmdb=1`;
+            else if (server === "videasy") video.src = `https://player.videasy.net/movie/${id}`;
             else if (server === "vidlink") video.src = `https://vidlink.pro/movie/${id}`;
             else if (server === "smashystream") video.src = `https://embed.smashystream.com/playere.php?tmdb=${id}`;
             else if (server === "multiembed") video.src = `https://multiembed.mov/?video_id=${id}&tmdb=1`;
