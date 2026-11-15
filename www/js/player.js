@@ -14,11 +14,11 @@ export function createPlayer({ onHistoryChange }) {
     let selectedType = "movie";
 
     const servers = [
-        ["vidsrcpro", "Server 1 (VidSrc Pro - Fast)"],
-        ["vidsrcicu", "Server 2 (VidSrc ICU)"],
+        ["superembed", "Server 1 (NioMovies / Fast)"],
+        ["vidsrccc", "Server 2 (VidSrc.cc)"],
         ["vidlink", "Server 3 (VidLink)"],
         ["smashystream", "Server 4 (SmashyStream)"],
-        ["autoembed", "Server 5 (AutoEmbed)"],
+        ["multiembed", "Server 5 (MultiEmbed)"],
         ["vidsrc", "Server 6 (VidSrc Me)"],
         ["2embed", "Server 7 (2Embed)"]
     ];
@@ -182,25 +182,25 @@ export function createPlayer({ onHistoryChange }) {
 
     function updateEmbedUrl() {
         if (!selectedItem) return;
-        const server = document.getElementById("server-select")?.value || "vidsrcpro";
+        const server = document.getElementById("server-select")?.value || "superembed";
         const season = document.getElementById("season-select")?.value || 1;
         const episode = document.getElementById("episode-select")?.value || 1;
         const id = selectedItem.id;
 
         if (selectedType === "tv") {
-            if (server === "vidsrcpro") video.src = `https://vidsrc.pro/embed/tv/${id}/${season}/${episode}`;
-            else if (server === "vidsrcicu") video.src = `https://vidsrc.icu/embed/tv/${id}/${season}/${episode}`;
+            if (server === "superembed") video.src = `https://multiembed.mov/directstream.php?video_id=${id}&tmdb=1&s=${season}&e=${episode}`;
+            else if (server === "vidsrccc") video.src = `https://vidsrc.cc/v2/embed/tv/${id}/${season}/${episode}`;
             else if (server === "vidlink") video.src = `https://vidlink.pro/tv/${id}/${season}/${episode}`;
             else if (server === "smashystream") video.src = `https://embed.smashystream.com/playere.php?tmdb=${id}&season=${season}&episode=${episode}`;
-            else if (server === "autoembed") video.src = `https://player.autoembed.cc/embed/tv/${id}/${season}/${episode}`;
+            else if (server === "multiembed") video.src = `https://multiembed.mov/?video_id=${id}&tmdb=1&s=${season}&e=${episode}`;
             else if (server === "vidsrc") video.src = `https://vidsrc.me/embed/tv?tmdb=${id}&season=${season}&episode=${episode}`;
             else video.src = `https://www.2embed.cc/embedtv/${id}?s=${season}&e=${episode}`;
         } else {
-            if (server === "vidsrcpro") video.src = `https://vidsrc.pro/embed/movie/${id}`;
-            else if (server === "vidsrcicu") video.src = `https://vidsrc.icu/embed/movie/${id}`;
+            if (server === "superembed") video.src = `https://multiembed.mov/directstream.php?video_id=${id}&tmdb=1`;
+            else if (server === "vidsrccc") video.src = `https://vidsrc.cc/v2/embed/movie/${id}`;
             else if (server === "vidlink") video.src = `https://vidlink.pro/movie/${id}`;
             else if (server === "smashystream") video.src = `https://embed.smashystream.com/playere.php?tmdb=${id}`;
-            else if (server === "autoembed") video.src = `https://player.autoembed.cc/embed/movie/${id}`;
+            else if (server === "multiembed") video.src = `https://multiembed.mov/?video_id=${id}&tmdb=1`;
             else if (server === "vidsrc") video.src = `https://vidsrc.me/embed/movie?tmdb=${id}`;
             else video.src = `https://www.2embed.cc/embed/${id}`;
         }

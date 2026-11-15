@@ -68,25 +68,37 @@
 
     <section id="player-container" class="player-container" aria-label="Video player">
         <div class="player-header">
-            <button id="close-pip-btn" class="player-action" type="button" aria-label="Close player">← Browse</button>
-            <div class="player-heading">
+            <button id="close-pip-btn" class="player-action player-back" type="button" aria-label="Close player">← Browse</button>
+            <div class="player-heading" aria-live="polite">
+                <p class="player-eyebrow">NOW PLAYING</p>
                 <h2 id="player-title" class="player-title">Now Playing</h2>
                 <p id="player-subtitle" class="player-subtitle"></p>
             </div>
-            <button id="fullscreen-player-btn" class="player-action" type="button" aria-label="Enter fullscreen">Fullscreen</button>
-            <button id="pip-player-btn" class="player-action" type="button" aria-label="Minimize player">Minimize</button>
-            <button id="close-mini-player-btn" class="player-action close-mini-player" type="button" aria-label="Close player">×</button>
+            <div class="player-actions">
+                <button id="fullscreen-player-btn" class="player-action" type="button" aria-label="Enter fullscreen">Fullscreen</button>
+                <button id="pip-player-btn" class="player-action" type="button" aria-label="Minimize player">Minimize</button>
+                <button id="close-mini-player-btn" class="player-action close-mini-player" type="button" aria-label="Close player">×</button>
+            </div>
         </div>
         <div id="tv-controls-host"></div>
-        <div class="video-wrapper">
-            <iframe
-                id="player"
-                src=""
-                title="Video player"
-                allowfullscreen
-                allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
-                referrerpolicy="no-referrer">
-            </iframe>
+        <div class="player-stage">
+            <div class="video-wrapper">
+                <iframe
+                    id="player"
+                    src=""
+                    title="Video player"
+                    allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+                    allowfullscreen="true"
+                    webkitallowfullscreen="true"
+                    mozallowfullscreen="true"
+                    referrerpolicy="no-referrer">
+                    <!--
+                    allowfullscreen="true"
+                    allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+                    referrerpolicy="no-referrer">
+                     -->
+                </iframe>
+            </div>
         </div>
     </section>
 
