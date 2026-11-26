@@ -9,6 +9,7 @@ const browseContent = document.getElementById("browse-content");
 const genreBar = document.getElementById("genre-bar");
 const contentContainer = document.getElementById("categories-container");
 const detailsPage = document.getElementById("details-page");
+const browsePage = document.getElementById("browse-page");
 const chatPage = document.getElementById("chat-page");
 const searchBox = document.getElementById("search-box");
 const navButtons = document.querySelectorAll(".nav-btn");
@@ -21,9 +22,14 @@ let currentView = "home";
 const chat = createChat({
     page: chatPage,
     messages: document.getElementById("chat-messages"),
+    welcome: document.getElementById("chat-welcome"),
     form: document.getElementById("chat-form"),
     input: document.getElementById("chat-input"),
-    sendButton: document.getElementById("chat-send")
+    sendButton: document.getElementById("chat-send"),
+    onOpen: (item, type) => {
+        browsePage.classList.remove("chat-mode");
+        details.show(item, type);
+    }
 });
 
 function dismissLoading() {
@@ -63,10 +69,11 @@ library = createLibrary({
 });
 
 function restoreCurrentView() {
+    browsePage.classList.toggle("chat-mode", currentView === "chat");
     detailsPage.hidden = true;
-    chatPage.hidden = true;
-    searchBox.hidden = false;
-    browseContent.hidden = false;
+    chatPage.hidden = currentView !== "chat";
+    searchBox.hidden = currentView === "chat";
+    browseContent.hidden = currentView === "chat";
     genreBar.hidden = currentView !== "home";
     if (currentView === "history") library.renderRecent();
     if (currentView === "my-list") library.renderMyList();
@@ -85,6 +92,7 @@ details = createDetails({
 
 function showView(view) {
     setNavigation(view);
+    browsePage.classList.toggle("chat-mode", view === "chat");
     detailsPage.hidden = true;
     chatPage.hidden = view !== "chat";
     searchBox.hidden = view === "chat";

@@ -80,23 +80,25 @@
         </section>
 
         <section id="chat-page" class="chat-page" aria-labelledby="chat-heading" hidden>
-            <header class="chat-header">
-                <p class="section-eyebrow">MOVIESHUB ASSISTANT</p>
-                <h2 id="chat-heading">What should we watch?</h2>
-                <p>Ask for a recommendation or a spoiler-free movie review.</p>
-            </header>
-            <div id="chat-messages" class="chat-messages" role="log" aria-live="polite" aria-relevant="additions"></div>
-            <div class="chat-suggestions" aria-label="Try asking">
-                <button type="button" class="chat-suggestion" data-prompt="Recommend a funny movie for tonight.">A funny movie for tonight</button>
-                <button type="button" class="chat-suggestion" data-prompt="Give me a spoiler-free review of Dune: Part Two.">Review a movie</button>
-                <button type="button" class="chat-suggestion" data-prompt="Recommend a thoughtful sci-fi movie with a great story.">Thought-provoking sci-fi</button>
+            <h2 id="chat-heading" class="visually-hidden">MoviesHub AI chat</h2>
+            <div id="chat-messages" class="chat-messages" role="log" aria-live="polite" aria-relevant="additions">
+                <div id="chat-welcome" class="chat-welcome">
+                    <span class="chat-welcome-mark" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.8 14.7 9l6.5 2.8-6.5 2.7-2.7 6.7-2.7-6.7L2.8 11.8 9.3 9z"></path><path d="m19 2 .8 1.8 1.7.7-1.7.8L19 7l-.8-1.7-1.7-.8 1.7-.7z"></path></svg>
+                    </span>
+                    <h3>Welcome. What are you in the mood for?</h3>
+                    <p>Tell me what you like, or ask about a movie.</p>
+                </div>
             </div>
             <form id="chat-form" class="chat-form">
                 <label class="visually-hidden" for="chat-input">Ask MoviesHub AI</label>
-                <textarea id="chat-input" name="message" rows="2" maxlength="2000" placeholder="Ask for a movie recommendation or review..." required></textarea>
-                <button id="chat-send" class="primary-action" type="submit">Send</button>
+                <textarea id="chat-input" name="message" rows="1" maxlength="2000" placeholder="Ask for a movie recommendation or review..." required></textarea>
+                <button id="chat-send" class="primary-action" type="submit" aria-label="Send message">
+                    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21 3-7.5 18-3.8-7.7L2 9.5 21 3Z"></path><path d="M9.7 13.3 21 3"></path></svg>
+                    <span class="visually-hidden">Send</span>
+                </button>
             </form>
-            <p class="chat-disclaimer">AI responses can be inaccurate. Reviews are spoiler-free unless you ask otherwise.</p>
+            <p class="chat-disclaimer">AI can make mistakes. Reviews are spoiler-free unless you ask for spoilers.</p>
         </section>
     </main>
 

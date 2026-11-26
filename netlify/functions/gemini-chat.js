@@ -115,13 +115,33 @@ exports.handler = async (event) => {
             body: JSON.stringify({
                 systemInstruction: {
                     parts: [{
-                        text: "You are MoviesHub's movie and TV recommendation assistant. Help users find something to watch and give thoughtful reviews. Keep reviews spoiler-free unless the user asks for spoilers. Be clear when you are uncertain, and do not claim current streaming availability."
+                        text: "You are MoviesHub's movie and TV recommendation assistant. Return a concise, friendly answer as structured JSON. Help users find something to watch or give thoughtful reviews. Keep reviews spoiler-free unless the user asks for spoilers. For recommendations, include up to three real, well-known titles as separate recommendation objects; keep each reason to one sentence. When the user asks about a specific movie or show, include that title as one item so the app can show its poster. For other questions, use an empty recommendations array. Be clear when uncertain and never claim current streaming availability. Do not write markdown in the reply field."
                     }]
                 },
                 contents,
                 generationConfig: {
                     temperature: 0.7,
-                    maxOutputTokens: 700
+                    maxOutputTokens: 900,
+                    responseMimeType: "application/json",
+                    responseSchema: {
+                        type: "OBJECT",
+                        properties: {
+                            reply: { type: "STRING" },
+                            recommendations: {
+                                type: "ARRAY",
+                                items: {
+                                    type: "OBJECT",
+                                    properties: {
+                                        title: { type: "STRING" },
+                                        year: { type: "STRING" },
+                                        reason: { type: "STRING" }
+                                    },
+                                    required: ["title", "year", "reason"]
+                                }
+                            }
+                        },
+                        required: ["reply", "recommendations"]
+                    }
                 }
             })
         });
@@ -170,14 +190,36 @@ exports.handler = async (event) => {
         return respond(502, { error: "The AI service returned an unreadable response." }, corsHeaders || {});
     }
 
-    const reply = geminiResult.candidates?.[0]?.content?.parts
+    const generatedText = geminiResult.candidates?.[0]?.content?.parts
         ?.map((part) => part.text || "")
         .join("")
         .trim();
-    if (!reply) {
+    if (!generatedText) {
         console.error("Gemini returned no text for the chat request.");
         return respond(502, { error: "The AI service returned an empty response." }, corsHeaders || {});
     }
 
-    return respond(200, { reply }, corsHeaders || {});
+    let generatedContent;
+    try {
+        generatedContent = JSON.parse(generatedText);
+    } catch {
+        console.error("Gemini returned structured content that was not valid JSON.");
+        return respond(502, { error: "The AI service returned an unreadable response. Please try again." }, corsHeaders || {});
+    }
+    if (typeof generatedContent.reply !== "string" || !generatedContent.reply.trim()) {
+        console.error("Gemini returned structured content without an answer.");
+        return respond(502, { error: "The AI service returned an empty response." }, corsHeaders || {});
+    }
+
+    const recommendations = Array.isArray(generatedContent.recommendations)
+        ? generatedContent.recommendations
+            .filter((item) => item && typeof item.title === "string" && item.title.trim())
+            .slice(0, 3)
+            .map((item) => ({
+                title: item.title.trim().slice(0, 120),
+                year: typeof item.year === "string" ? item.year.trim().slice(0, 4) : "",
+                reason: typeof item.reason === "string" ? item.reason.trim().slice(0, 300) : ""
+            }))
+        : [];
+    return respond(200, { reply: generatedContent.reply.trim(), recommendations }, corsHeaders || {});
 };
