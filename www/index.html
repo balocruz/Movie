@@ -23,8 +23,9 @@
                 <button class="nav-btn active" type="button" data-view="home" aria-current="page">Discover</button>
                 <button class="nav-btn" type="button" data-view="history">Recently Watched</button>
                 <button class="nav-btn" type="button" data-view="my-list">My List</button>
+                <button class="nav-btn" type="button" data-view="chat">AI Chat</button>
             </nav>
-            <div class="search-box">
+            <div class="search-box" id="search-box">
                 <label class="visually-hidden" for="search">Search movies and TV shows</label>
                 <input type="search" id="search" placeholder="Search movies, TV shows..." autocomplete="off" aria-controls="search-suggestions">
                 <button id="btn" type="button">Search</button>
@@ -63,6 +64,26 @@
                     </div>
                 </div>
             </div>
+        </section>
+
+        <section id="chat-page" class="chat-page" aria-labelledby="chat-heading" hidden>
+            <header class="chat-header">
+                <p class="section-eyebrow">MOVIESHUB ASSISTANT</p>
+                <h2 id="chat-heading">What should we watch?</h2>
+                <p>Ask for a recommendation or a spoiler-free movie review.</p>
+            </header>
+            <div id="chat-messages" class="chat-messages" role="log" aria-live="polite" aria-relevant="additions"></div>
+            <div class="chat-suggestions" aria-label="Try asking">
+                <button type="button" class="chat-suggestion" data-prompt="Recommend a funny movie for tonight.">A funny movie for tonight</button>
+                <button type="button" class="chat-suggestion" data-prompt="Give me a spoiler-free review of Dune: Part Two.">Review a movie</button>
+                <button type="button" class="chat-suggestion" data-prompt="Recommend a thoughtful sci-fi movie with a great story.">Thought-provoking sci-fi</button>
+            </div>
+            <form id="chat-form" class="chat-form">
+                <label class="visually-hidden" for="chat-input">Ask MoviesHub AI</label>
+                <textarea id="chat-input" name="message" rows="2" maxlength="2000" placeholder="Ask for a movie recommendation or review..." required></textarea>
+                <button id="chat-send" class="primary-action" type="submit">Send</button>
+            </form>
+            <p class="chat-disclaimer">AI responses can be inaccurate. Reviews are spoiler-free unless you ask otherwise.</p>
         </section>
     </main>
 

@@ -1,4 +1,5 @@
 import { createCatalog } from "./catalog.js";
+import { createChat } from "./chat.js";
 import { createDetails } from "./details.js";
 import { createLibrary } from "./library.js";
 import { createPlayer } from "./player.js";
@@ -8,6 +9,8 @@ const browseContent = document.getElementById("browse-content");
 const genreBar = document.getElementById("genre-bar");
 const contentContainer = document.getElementById("categories-container");
 const detailsPage = document.getElementById("details-page");
+const chatPage = document.getElementById("chat-page");
+const searchBox = document.getElementById("search-box");
 const navButtons = document.querySelectorAll(".nav-btn");
 const genreButtons = document.querySelectorAll(".genre-btn");
 const searchInput = document.getElementById("search");
@@ -15,6 +18,13 @@ const searchButton = document.getElementById("btn");
 const searchSuggestions = document.getElementById("search-suggestions");
 const loadingScreen = document.getElementById("app-loading");
 let currentView = "home";
+const chat = createChat({
+    page: chatPage,
+    messages: document.getElementById("chat-messages"),
+    form: document.getElementById("chat-form"),
+    input: document.getElementById("chat-input"),
+    sendButton: document.getElementById("chat-send")
+});
 
 function dismissLoading() {
     if (!loadingScreen) return;
@@ -54,6 +64,8 @@ library = createLibrary({
 
 function restoreCurrentView() {
     detailsPage.hidden = true;
+    chatPage.hidden = true;
+    searchBox.hidden = false;
     browseContent.hidden = false;
     genreBar.hidden = currentView !== "home";
     if (currentView === "history") library.renderRecent();
@@ -74,11 +86,14 @@ details = createDetails({
 function showView(view) {
     setNavigation(view);
     detailsPage.hidden = true;
-    browseContent.hidden = false;
+    chatPage.hidden = view !== "chat";
+    searchBox.hidden = view === "chat";
+    browseContent.hidden = view === "chat";
     genreBar.hidden = view !== "home";
     if (view === "home") catalog.loadHome();
     else if (view === "history") library.renderRecent();
     else if (view === "my-list") library.renderMyList();
+    else if (view === "chat") chat.focus();
 }
 
 navButtons.forEach((button) => {

@@ -2,3 +2,4 @@
 base = "."
 command = "npm run build:config"
 publish = "www"
+functions = "netlify/functions"

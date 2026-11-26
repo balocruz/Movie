@@ -19,3 +19,5 @@ android/capacitor-cordova-android-plugins/build/
 .DS_Store
 Thumbs.db
 *.log
+# Local Netlify folder
+.netlify

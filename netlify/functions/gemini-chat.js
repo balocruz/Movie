@@ -1,0 +1,183 @@
+const GEMINI_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent";
+const MAX_BODY_BYTES = 16000;
+const MAX_MESSAGES = 20;
+const MAX_MESSAGE_LENGTH = 2000;
+const MAX_TOTAL_LENGTH = 12000;
+
+function getAllowedOrigins() {
+    const configuredOrigins = (process.env.GEMINI_ALLOWED_ORIGINS || "")
+        .split(",")
+        .map((origin) => origin.trim())
+        .filter(Boolean);
+    return new Set([
+        ...configuredOrigins,
+        process.env.URL,
+        process.env.DEPLOY_PRIME_URL,
+        "https://localhost",
+        "capacitor://localhost"
+    ].filter(Boolean));
+}
+
+function getCorsHeaders(origin) {
+    if (!origin) return {};
+    const allowedOrigins = getAllowedOrigins();
+    if (!allowedOrigins.has(origin)) return null;
+    return {
+        "Access-Control-Allow-Origin": origin,
+        "Access-Control-Allow-Methods": "POST, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type",
+        "Access-Control-Max-Age": "86400",
+        Vary: "Origin"
+    };
+}
+
+function respond(statusCode, body, corsHeaders = {}) {
+    return {
+        statusCode,
+        headers: {
+            "Content-Type": "application/json; charset=utf-8",
+            ...corsHeaders
+        },
+        body: JSON.stringify(body)
+    };
+}
+
+function validateMessages(messages) {
+    if (!Array.isArray(messages) || messages.length === 0 || messages.length > MAX_MESSAGES) {
+        return null;
+    }
+
+    let totalLength = 0;
+    const validMessages = [];
+    for (const message of messages) {
+        if (
+            !message ||
+            !["user", "assistant"].includes(message.role) ||
+            typeof message.text !== "string"
+        ) {
+            return null;
+        }
+        const text = message.text.trim();
+        if (!text || text.length > MAX_MESSAGE_LENGTH) return null;
+        totalLength += text.length;
+        if (totalLength > MAX_TOTAL_LENGTH) return null;
+        validMessages.push({
+            role: message.role === "assistant" ? "model" : "user",
+            parts: [{ text }]
+        });
+    }
+
+    if (validMessages[validMessages.length - 1].role !== "user") return null;
+    return validMessages;
+}
+
+exports.handler = async (event) => {
+    const origin = event.headers?.origin || event.headers?.Origin || "";
+    const corsHeaders = getCorsHeaders(origin);
+    if (corsHeaders === null) return respond(403, { error: "This app origin is not allowed." });
+
+    if (event.httpMethod === "OPTIONS") {
+        return { statusCode: 204, headers: corsHeaders || {}, body: "" };
+    }
+    if (event.httpMethod !== "POST") {
+        return respond(405, { error: "Use POST to send a chat message." }, corsHeaders || {});
+    }
+    if (!event.body || Buffer.byteLength(event.body, "utf8") > MAX_BODY_BYTES) {
+        return respond(413, { error: "The chat request is too large." }, corsHeaders || {});
+    }
+
+    let requestBody;
+    try {
+        requestBody = JSON.parse(event.body);
+    } catch {
+        return respond(400, { error: "The chat request must contain valid JSON." }, corsHeaders || {});
+    }
+
+    const contents = validateMessages(requestBody?.messages);
+    if (!contents) {
+        return respond(400, { error: "Send up to 20 non-empty user and assistant messages." }, corsHeaders || {});
+    }
+
+    const apiKey = process.env.GEMINI_API_KEY?.trim();
+    if (!apiKey) {
+        console.error("GEMINI_API_KEY is not configured for the chat function.");
+        return respond(503, { error: "The AI assistant is not configured yet." }, corsHeaders || {});
+    }
+
+    let geminiResponse;
+    try {
+        geminiResponse = await fetch(GEMINI_ENDPOINT, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "x-goog-api-key": apiKey
+            },
+            body: JSON.stringify({
+                systemInstruction: {
+                    parts: [{
+                        text: "You are MoviesHub's movie and TV recommendation assistant. Help users find something to watch and give thoughtful reviews. Keep reviews spoiler-free unless the user asks for spoilers. Be clear when you are uncertain, and do not claim current streaming availability."
+                    }]
+                },
+                contents,
+                generationConfig: {
+                    temperature: 0.7,
+                    maxOutputTokens: 700
+                }
+            })
+        });
+    } catch (error) {
+        console.error("Gemini request could not be completed.", error.message);
+        return respond(502, { error: "Couldn't reach the AI service. Please try again." }, corsHeaders || {});
+    }
+
+    if (!geminiResponse.ok) {
+        let providerMessage = "";
+        try {
+            const errorBody = await geminiResponse.json();
+            if (typeof errorBody.error?.message === "string") {
+                providerMessage = errorBody.error.message
+                    .replace(apiKey, "[redacted]")
+                    .slice(0, 400);
+            }
+        } catch {
+            providerMessage = "";
+        }
+        console.error(
+            `Gemini request failed with status ${geminiResponse.status}.`,
+            providerMessage
+        );
+
+        if (geminiResponse.status === 401 || geminiResponse.status === 403) {
+            return respond(502, {
+                error: "Gemini rejected the API key. Check GEMINI_API_KEY and confirm Gemini API access is enabled for that key."
+            }, corsHeaders || {});
+        }
+        if (geminiResponse.status === 429) {
+            return respond(502, {
+                error: "Gemini rate limit or quota reached. Check the quota for the Google project that owns this API key."
+            }, corsHeaders || {});
+        }
+        return respond(502, {
+            error: `Gemini returned HTTP ${geminiResponse.status}. Check the Netlify Dev terminal for details.`
+        }, corsHeaders || {});
+    }
+
+    let geminiResult;
+    try {
+        geminiResult = await geminiResponse.json();
+    } catch {
+        console.error("Gemini returned a response that was not valid JSON.");
+        return respond(502, { error: "The AI service returned an unreadable response." }, corsHeaders || {});
+    }
+
+    const reply = geminiResult.candidates?.[0]?.content?.parts
+        ?.map((part) => part.text || "")
+        .join("")
+        .trim();
+    if (!reply) {
+        console.error("Gemini returned no text for the chat request.");
+        return respond(502, { error: "The AI service returned an empty response." }, corsHeaders || {});
+    }
+
+    return respond(200, { reply }, corsHeaders || {});
+};

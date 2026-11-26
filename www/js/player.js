@@ -63,7 +63,7 @@ export function createPlayer({ onHistoryChange }) {
         controls.id = "tv-controls";
         controls.className = "tv-selector-container";
         const serverGroup = document.createElement("div");
-        serverGroup.className = "selector-group";
+        serverGroup.className = "selector-group selector-server";
         const serverLabel = document.createElement("label");
         serverLabel.htmlFor = "server-select";
         serverLabel.textContent = "Server:";
@@ -80,7 +80,7 @@ export function createPlayer({ onHistoryChange }) {
 
         if (type === "tv") {
             const seasonGroup = document.createElement("div");
-            seasonGroup.className = "selector-group";
+            seasonGroup.className = "selector-group selector-season";
             const seasonLabel = document.createElement("label");
             seasonLabel.htmlFor = "season-select";
             seasonLabel.textContent = "Season:";
@@ -95,7 +95,7 @@ export function createPlayer({ onHistoryChange }) {
             seasonGroup.append(seasonLabel, seasonSelect);
 
             const episodeGroup = document.createElement("div");
-            episodeGroup.className = "selector-group";
+            episodeGroup.className = "selector-group selector-episode";
             const episodeLabel = document.createElement("label");
             episodeLabel.htmlFor = "episode-select";
             episodeLabel.textContent = "Episode:";
