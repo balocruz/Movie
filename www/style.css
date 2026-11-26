@@ -568,6 +568,9 @@ main {
   cursor: pointer;
 }
 
+.nav-btn svg { display: none; }
+.nav-label-short { display: none; }
+
 .nav-btn:hover,
 .nav-btn.active {
   color: var(--text-color);
@@ -745,14 +748,15 @@ main {
 }
 
 @media (max-width: 760px) {
-  main { padding: 14px 14px 36px; }
+  main { padding: 14px 14px calc(96px + env(safe-area-inset-bottom)); }
   .app-header { display: grid; grid-template-columns: 1fr auto; gap: 10px 12px; margin-bottom: 18px; }
   .logo { align-self: center; }
-  .primary-nav { display: grid; grid-column: 1 / -1; grid-row: 2; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; padding-bottom: 10px; border-bottom: 1px solid var(--line-color); }
-  .nav-btn { min-width: 0; min-height: 46px; padding: 8px 6px; border: 1px solid transparent; border-radius: 6px; font-size: .8rem; line-height: 1.2; text-align: center; }
-  .nav-btn.active { border-color: #61272b; }
-  .nav-btn.active::after { width: 22px; margin: 4px auto 0; border-radius: 2px; }
-  .search-box { grid-column: 1 / -1; grid-row: 3; width: 100%; max-width: none; }
+  .primary-nav { position: fixed; inset: auto 0 0; z-index: 9998; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; padding: 7px max(8px, env(safe-area-inset-right)) calc(7px + env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left)); border: 0; border-top: 1px solid #303638; background: rgba(15, 17, 18, .96); box-shadow: 0 -12px 30px rgba(0, 0, 0, .35); backdrop-filter: blur(16px); }
+  .nav-btn { display: flex; min-width: 0; min-height: 58px; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 6px 3px; border: 1px solid transparent; border-radius: 9px; font-size: .7rem; line-height: 1.1; text-align: center; white-space: nowrap; }
+  .nav-btn svg { display: block; width: 20px; height: 20px; flex: 0 0 auto; }
+  .nav-btn.active { border-color: #61272b; background: #271719; }
+  .nav-btn.active::after { display: none; }
+  .search-box { grid-column: 1 / -1; grid-row: 2; width: 100%; max-width: none; }
   .genre-bar { margin-bottom: 20px; }
   .movie-card { flex-basis: 126px; }
   .image-cover { height: 184px; }
@@ -921,8 +925,21 @@ main {
 }
 
 @media (max-width: 480px) {
-  .primary-nav { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
-  .nav-btn { min-height: 46px; padding: 9px 10px; font-size: .85rem; }
+  .primary-nav { gap: 2px; padding-right: max(4px, env(safe-area-inset-right)); padding-left: max(4px, env(safe-area-inset-left)); }
+  .nav-btn { min-height: 54px; gap: 3px; padding: 5px 2px; font-size: .66rem; }
+  .nav-btn svg { width: 19px; height: 19px; }
+  .nav-label-full { display: none; }
+  .nav-label-short { display: inline; }
+}
+
+@media (max-width: 360px) {
+  main { padding-right: 10px; padding-left: 10px; }
+  .player-container { padding-right: max(8px, env(safe-area-inset-right)); padding-left: max(8px, env(safe-area-inset-left)); }
+  .player-header { grid-template-columns: auto minmax(0, 1fr) auto; gap: 4px; }
+  .player-action { min-height: 38px; padding: 6px 6px; font-size: .66rem; }
+  .player-actions { gap: 3px; }
+  .tv-selector-container { gap: 8px; padding: 8px; }
+  .selector-group select { min-height: 42px; padding: 7px 24px 7px 8px; font-size: .72rem; }
 }
 
 @media (orientation: landscape) and (max-height: 600px) {

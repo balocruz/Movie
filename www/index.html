@@ -20,10 +20,23 @@
         <header class="app-header">
             <h1 class="logo">Movies<span>Hub</span></h1>
             <nav class="primary-nav" aria-label="Main navigation">
-                <button class="nav-btn active" type="button" data-view="home" aria-current="page">Discover</button>
-                <button class="nav-btn" type="button" data-view="history">Recently Watched</button>
-                <button class="nav-btn" type="button" data-view="my-list">My List</button>
-                <button class="nav-btn" type="button" data-view="chat">AI Chat</button>
+                <button class="nav-btn active" type="button" data-view="home" aria-current="page">
+                    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="m15.8 8.2-2.6 5.2-5 2.4 2.4-5z"></path></svg>
+                    <span>Discover</span>
+                </button>
+                <button class="nav-btn" type="button" data-view="history" aria-label="Recently Watched">
+                    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>
+                    <span class="nav-label-full">Recently Watched</span>
+                    <span class="nav-label-short">Watched</span>
+                </button>
+                <button class="nav-btn" type="button" data-view="my-list">
+                    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4.5A1.5 1.5 0 0 1 7.5 3h9A1.5 1.5 0 0 1 18 4.5V21l-6-3.5L6 21z"></path></svg>
+                    <span>My List</span>
+                </button>
+                <button class="nav-btn" type="button" data-view="chat">
+                    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11.5a7.5 7.5 0 0 1-7.5 7.5H6l-3 2v-6a7.5 7.5 0 1 1 17-3.5Z"></path><path d="M12.5 7.5v4m-2-2h4"></path></svg>
+                    <span>AI Chat</span>
+                </button>
             </nav>
             <div class="search-box" id="search-box">
                 <label class="visually-hidden" for="search">Search movies and TV shows</label>

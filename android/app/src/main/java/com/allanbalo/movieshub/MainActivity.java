@@ -1,6 +1,7 @@
 package com.allanbalo.movieshub;
 
 import android.annotation.SuppressLint;
+import android.content.pm.ActivityInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Message;
@@ -28,6 +29,7 @@ public class MainActivity extends BridgeActivity {
     private WebChromeClient.CustomViewCallback customViewCallback;
     private BridgeWebChromeClient chromeClient;
     private OnBackPressedCallback onBackPressedCallback;
+    private int requestedOrientationBeforeFullscreen;
 
     @Override
     @SuppressLint("SetJavaScriptEnabled")
@@ -69,6 +71,8 @@ public class MainActivity extends BridgeActivity {
                     customView = view;
                     customViewCallback = callback;
                     onBackPressedCallback.setEnabled(true);
+                    requestedOrientationBeforeFullscreen = getRequestedOrientation();
+                    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
 
                     // Hide the main WebView when full-screen is active
                     // Use INVISIBLE instead of GONE to ensure the WebView stays active for the video stream
@@ -128,6 +132,8 @@ public class MainActivity extends BridgeActivity {
                         int flags = View.SYSTEM_UI_FLAG_VISIBLE;
                         decor.setSystemUiVisibility(flags);
                     }
+
+                    setRequestedOrientation(requestedOrientationBeforeFullscreen);
                 }
 
                 @Override
