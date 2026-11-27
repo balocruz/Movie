@@ -37,4 +37,4 @@ To verify the full path, run the workflow manually, confirm the job succeeds, op
 
 ## Netlify sites
 
-Keep the existing main app site at the repository root; the root `netlify.toml` publishes `www/`. Deploy the APK website as a second Netlify site connected to this repository, with **Package directory** set to `download-site` and **Base directory** unset. That site uses `download-site/netlify.toml`. The per-site ignore rules skip builds for commits that do not change that site's files.
+Keep the existing main app site at the repository root; the root `netlify.toml` publishes `www/`. Deploy the APK website as a second Netlify site connected to this repository, with **Base directory** set to `download-site`. That site uses `download-site/netlify.toml` and publishes `.`. The per-site ignore rules skip builds for commits that do not change that site's files.

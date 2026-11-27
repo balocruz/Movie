@@ -4,7 +4,7 @@ This static vanilla HTML/CSS/JavaScript site is served from the repository's `do
 
 ## Netlify setup
 
-Keep the existing Netlify site connected to the repository root; the root `netlify.toml` publishes the main app from `www/`. For the download site, create a second Netlify site connected to this repository and set its **Package directory** to `download-site`, leaving **Base directory** unset. Netlify will use this directory's `netlify.toml` for the download site. Each site's ignore rule skips builds when files outside that site change.
+Keep the existing Netlify site connected to the repository root; the root `netlify.toml` publishes the main app from `www/`. For the download site, create a second Netlify site connected to this repository and set its **Base directory** to `download-site`. The `download-site/netlify.toml` publishes the base itself (`.`). Each site's ignore rule skips builds when files outside that site change.
 
 ## Local preview
 
