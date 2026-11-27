@@ -62,7 +62,7 @@ export function createChat({ page, messages, welcome, form, input, sendButton, o
         list.className = "chat-recommendations";
         container.append(list);
 
-        recommendations.slice(0, 3).forEach((recommendation) => {
+        recommendations.slice(0, 10).forEach((recommendation) => {
             if (!recommendation || typeof recommendation.title !== "string" || !recommendation.title.trim()) return;
             const card = document.createElement("article");
             card.className = "chat-movie-card";
@@ -141,6 +141,39 @@ export function createChat({ page, messages, welcome, form, input, sendButton, o
         input.disabled = busy;
     }
 
+    function thinkingMessage(userMessage) {
+        const message = userMessage.toLocaleLowerCase();
+        if (/^(hi|hello|hey|good morning|good afternoon|good evening)[!. ]*$/.test(message)) {
+            return "Thinking of a friendly reply";
+        }
+        if (/\b(explain|ending|scene|meaning|plot|review|confused|understand|what happened|why did)\b/.test(message)) {
+            return "Thinking it through";
+        }
+        if (/\b(recommend|suggest|what to watch|movie|movies|film|films|show|series)\b/.test(message)) {
+            return "Finding your next watch";
+        }
+        return "Putting my thoughts together";
+    }
+
+    function appendThinking(text) {
+        const message = document.createElement("div");
+        message.className = "chat-message chat-message-assistant chat-message-thinking";
+        message.setAttribute("role", "status");
+
+        const label = document.createElement("span");
+        label.textContent = text;
+        const dots = document.createElement("span");
+        dots.className = "chat-thinking-dots";
+        dots.setAttribute("aria-hidden", "true");
+        for (let index = 0; index < 3; index++) dots.append(document.createElement("i"));
+        message.append(label, dots);
+
+        welcome.hidden = true;
+        messages.append(message);
+        messages.scrollTop = messages.scrollHeight;
+        return message;
+    }
+
     async function sendMessage(text) {
         const message = text.trim();
         if (!message || sendButton.disabled) return;
@@ -149,7 +182,7 @@ export function createChat({ page, messages, welcome, form, input, sendButton, o
         input.style.height = "";
         history.push({ role: "user", text: message });
         appendMessage(message, "user");
-        const pending = appendMessage("Finding something good...", "assistant");
+        const pending = appendThinking(thinkingMessage(message));
         setBusy(true);
 
         try {
@@ -177,7 +210,8 @@ export function createChat({ page, messages, welcome, form, input, sendButton, o
             appendMessage(result.reply, "assistant", result.recommendations);
         } catch (error) {
             pending.remove();
-            appendMessage(error.message || "Couldn't connect to the assistant. Please try again.", "assistant", "chat-message-error");
+            history.pop();
+            appendMessage(error.message || "Couldn't connect to the assistant. Please try again.", "assistant", [], "chat-message-error");
         } finally {
             setBusy(false);
             input.focus();

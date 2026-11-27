@@ -3,6 +3,7 @@ const MAX_BODY_BYTES = 16000;
 const MAX_MESSAGES = 20;
 const MAX_MESSAGE_LENGTH = 2000;
 const MAX_TOTAL_LENGTH = 12000;
+const MAX_RECOMMENDATIONS = 10;
 
 function getAllowedOrigins() {
     const configuredOrigins = (process.env.GEMINI_ALLOWED_ORIGINS || "")
@@ -115,13 +116,13 @@ exports.handler = async (event) => {
             body: JSON.stringify({
                 systemInstruction: {
                     parts: [{
-                        text: "You are MoviesHub's movie and TV recommendation assistant. Return a concise, friendly answer as structured JSON. Help users find something to watch or give thoughtful reviews. Keep reviews spoiler-free unless the user asks for spoilers. For recommendations, include up to three real, well-known titles as separate recommendation objects; keep each reason to one sentence. When the user asks about a specific movie or show, include that title as one item so the app can show its poster. For other questions, use an empty recommendations array. Be clear when uncertain and never claim current streaming availability. Do not write markdown in the reply field."
+                        text: "You are MoviesHub's movie and TV recommendation assistant. Return a concise, friendly answer as structured JSON. Help users find something to watch, discuss movies, and give thoughtful reviews. For a recommendation request, include at least three distinct, real titles. If the user asks for a number, provide that many when it is between three and ten; never provide fewer than three or more than ten titles. Keep each reason to one sentence. Keep reviews spoiler-free by default, but if the user says they have watched a movie or asks you to explain a scene, plot point, or ending, explain it directly and allow spoilers for that title; do not refuse just because it contains spoilers. When the user asks about a specific movie or show, include that title as one item so the app can show its poster. For greetings and unrelated questions, reply naturally and use an empty recommendations array. Be clear when uncertain and never claim current streaming availability. Do not write markdown in the reply field."
                     }]
                 },
                 contents,
                 generationConfig: {
                     temperature: 0.7,
-                    maxOutputTokens: 900,
+                    maxOutputTokens: 2000,
                     responseMimeType: "application/json",
                     responseSchema: {
                         type: "OBJECT",
@@ -214,7 +215,7 @@ exports.handler = async (event) => {
     const recommendations = Array.isArray(generatedContent.recommendations)
         ? generatedContent.recommendations
             .filter((item) => item && typeof item.title === "string" && item.title.trim())
-            .slice(0, 3)
+            .slice(0, MAX_RECOMMENDATIONS)
             .map((item) => ({
                 title: item.title.trim().slice(0, 120),
                 year: typeof item.year === "string" ? item.year.trim().slice(0, 4) : "",

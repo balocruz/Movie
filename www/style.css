@@ -739,6 +739,12 @@ main {
 .chat-message-content code { padding: 2px 5px; border-radius: 4px; color: #ffc2c5; background: #292021; font-family: ui-monospace, monospace; font-size: .9em; }
 .chat-message-user { align-self: flex-end; color: #fff; background: #4a181d; }
 .chat-message-error { width: fit-content; max-width: 100%; padding: 10px 13px; border: 1px solid #8c282e; border-radius: 8px; color: #ffd3d5; background: #2a1719; }
+.chat-message-thinking { display: flex; width: fit-content; align-items: center; gap: 10px; padding: 9px 12px; border: 1px solid #303638; border-radius: 9px; color: #c4c9ca; background: #181c1d; font-size: .84rem; }
+.chat-thinking-dots { display: inline-flex; align-items: center; gap: 3px; }
+.chat-thinking-dots i { width: 4px; height: 4px; border-radius: 50%; background: #ff7b82; animation: chat-thinking 1s ease-in-out infinite; }
+.chat-thinking-dots i:nth-child(2) { animation-delay: .14s; }
+.chat-thinking-dots i:nth-child(3) { animation-delay: .28s; }
+@keyframes chat-thinking { 0%, 60%, 100% { opacity: .35; transform: translateY(0); } 30% { opacity: 1; transform: translateY(-3px); } }
 .chat-recommendations { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(150px, 100%), 1fr)); gap: 10px; width: 100%; margin-top: 12px; }
 .chat-movie-card, .chat-movie-open { display: grid; min-width: 0; grid-template-columns: 58px minmax(0, 1fr); gap: 11px; overflow: hidden; padding: 8px; border: 1px solid #303638; border-radius: 8px; color: inherit; background: #171b1c; text-align: left; }
 .chat-movie-open { width: 100%; cursor: pointer; font: inherit; }
@@ -808,6 +814,7 @@ main {
 @media (prefers-reduced-motion: reduce) {
   .state-message.is-loading::before { animation: none; }
   .app-loading, .app-loading-indicator::after { animation: none; transition-duration: 0.01ms; }
+  .chat-thinking-dots i { animation: none; }
 }
 
 .player-container {

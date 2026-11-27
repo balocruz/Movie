@@ -28,6 +28,8 @@ const chat = createChat({
     sendButton: document.getElementById("chat-send"),
     onOpen: (item, type) => {
         browsePage.classList.remove("chat-mode");
+        chatPage.hidden = true;
+        searchBox.hidden = false;
         details.show(item, type);
     }
 });
