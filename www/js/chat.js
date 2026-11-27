@@ -180,6 +180,7 @@ export function createChat({ page, messages, welcome, form, input, sendButton, o
 
         input.value = "";
         input.style.height = "";
+        input.blur();
         history.push({ role: "user", text: message });
         appendMessage(message, "user");
         const pending = appendThinking(thinkingMessage(message));
@@ -214,7 +215,6 @@ export function createChat({ page, messages, welcome, form, input, sendButton, o
             appendMessage(error.message || "Couldn't connect to the assistant. Please try again.", "assistant", [], "chat-message-error");
         } finally {
             setBusy(false);
-            input.focus();
         }
     }
 
