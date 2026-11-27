@@ -61,7 +61,7 @@ jobs:
 
       - name: Build signed release APK
         working-directory: android
-        run: ./gradlew assembleRelease --no-daemon -PversionCode=${{ steps.version.outputs.code }} -PversionName=${{ steps.version.outputs.name }}
+        run: bash ./gradlew assembleRelease --no-daemon -PversionCode=${{ steps.version.outputs.code }} -PversionName=${{ steps.version.outputs.name }}
         env:
           ANDROID_KEYSTORE_PATH: ${{ runner.temp }}/release-keystore.jks
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
