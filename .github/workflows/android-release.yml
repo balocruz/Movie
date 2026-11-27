@@ -40,6 +40,9 @@ jobs:
           TMDB_ACCESS_TOKEN: ${{ secrets.TMDB_ACCESS_TOKEN }}
           GEMINI_FUNCTION_URL: ${{ secrets.GEMINI_FUNCTION_URL }}
 
+      - name: Sync Capacitor Android project
+        run: npx cap sync android
+
       - name: Prepare Android release version
         id: version
         shell: bash
