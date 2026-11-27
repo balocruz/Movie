@@ -7,17 +7,18 @@ const envPath = path.join(projectRoot, ".env");
 if (fs.existsSync(envPath)) dotenv.config({ path: envPath });
 const token = process.env.TMDB_ACCESS_TOKEN?.trim();
 if (!token) throw new Error("TMDB_ACCESS_TOKEN is missing. Set it in .env or the deployment environment.");
-const geminiFunctionUrl = process.env.GEMINI_FUNCTION_URL?.trim() || "/.netlify/functions/gemini-chat";
+const webGeminiFunctionUrl = "/.netlify/functions/gemini-chat";
+const androidGeminiFunctionUrl = process.env.GEMINI_FUNCTION_URL?.trim() || webGeminiFunctionUrl;
 
-const generatedConfig = `export const TMDB_ACCESS_TOKEN = ${JSON.stringify(token)};\nexport const GEMINI_FUNCTION_URL = ${JSON.stringify(geminiFunctionUrl)};\n`;
-const outputPaths = [
-    path.join(projectRoot, "www/js/config.js"),
-    path.join(projectRoot, "android/app/src/main/assets/public/js/config.js")
-];
-
-for (const outputPath of outputPaths) {
-    fs.mkdirSync(path.dirname(outputPath), { recursive: true });
-    fs.writeFileSync(outputPath, generatedConfig, "utf8");
+function configFor(geminiFunctionUrl) {
+    return `export const TMDB_ACCESS_TOKEN = ${JSON.stringify(token)};\nexport const GEMINI_FUNCTION_URL = ${JSON.stringify(geminiFunctionUrl)};\n`;
 }
 
-console.log("Generated local TMDB config for web and Android builds.");
+const webConfigPath = path.join(projectRoot, "www/js/config.js");
+const androidConfigPath = path.join(projectRoot, "android/app/src/main/assets/public/js/config.js");
+fs.mkdirSync(path.dirname(webConfigPath), { recursive: true });
+fs.mkdirSync(path.dirname(androidConfigPath), { recursive: true });
+fs.writeFileSync(webConfigPath, configFor(webGeminiFunctionUrl), "utf8");
+fs.writeFileSync(androidConfigPath, configFor(androidGeminiFunctionUrl), "utf8");
+
+console.log("Generated web and Android app config.");

@@ -1,10 +1,10 @@
 # Android APK releases
 
-The `Android release` GitHub Actions workflow builds a signed APK on each push to `main` and on demand from **Actions → Android release → Run workflow**. It sets version codes to `10000 + GitHub workflow run number`, and version names to `1.0.<run number>`. Each successful run publishes `MoviesHub.apk` on a stable GitHub Release tagged `v1.0.<run number>`. The download site reads that release and prior stable releases directly from the public GitHub Releases API.
+The `Android release` workflow runs only when a `v*` tag is pushed or when someone starts it from GitHub Actions. A tag such as `v1.1.0` creates version name `1.1.0`; a manual run asks for the version name. The Android version code increases for each workflow run. Ordinary commits do not build or publish an APK.
 
-## Repository Actions secrets
+## GitHub Actions secrets
 
-In GitHub, open **Settings → Secrets and variables → Actions → New repository secret** and add:
+In GitHub, open **Settings > Secrets and variables > Actions > New repository secret** and add:
 
 | Secret | Value |
 | --- | --- |
@@ -12,12 +12,14 @@ In GitHub, open **Settings → Secrets and variables → Actions → New reposit
 | `ANDROID_KEYSTORE_PASSWORD` | Keystore password |
 | `ANDROID_KEY_ALIAS` | Signing key alias |
 | `ANDROID_KEY_PASSWORD` | Signing key password |
-| `TMDB_ACCESS_TOKEN` | The same TMDB access token used by the app's local `.env` |
-| `GEMINI_FUNCTION_URL` | Optional deployed Netlify chat function URL; may be left unset if the default path is correct |
+| `TMDB_ACCESS_TOKEN` | The TMDB access token used by the app |
+| `GEMINI_FUNCTION_URL` | Optional public URL for the Netlify chat function used by native Android |
 
-Keep a secure backup of the keystore. Future APKs must use the same signing key for Android to recognize them as updates. Never commit the keystore or its passwords. The workflow writes the decoded keystore only to the temporary GitHub runner directory and uses GitHub's masked secrets for credentials.
+Keep a secure backup of the keystore. Future APKs must use the same signing key for Android to recognize them as updates. Never commit the keystore or its passwords. The workflow writes the decoded keystore only to the temporary GitHub runner directory.
 
-For PowerShell, create the one-line secret value with:
+On the main app's Netlify site, set `TMDB_ACCESS_TOKEN` for the build and `GEMINI_API_KEY` for the chat function. Keep the Gemini key in Netlify environment variables; it does not belong in the browser or repository.
+
+For PowerShell, create the one-line keystore secret with:
 
 ```powershell
 [Convert]::ToBase64String([IO.File]::ReadAllBytes('C:\path\to\release-keystore.jks'))
@@ -29,12 +31,10 @@ For macOS/Linux:
 base64 -w 0 release-keystore.jks
 ```
 
-## Trigger and inspect a build
+## Run and inspect a build
 
-Push a commit to `main`, or manually run the workflow from the GitHub Actions tab. A successful job verifies the APK signature, then creates a release with the version tag and `MoviesHub.apk`. The download page updates from the public API on page load; no download URL needs to be edited. A build will fail early if signing credentials or `TMDB_ACCESS_TOKEN` are missing.
-
-To verify the full path, run the workflow manually, confirm the job succeeds, open its GitHub Release and download `MoviesHub.apk`, then visit the Netlify site and check the displayed version, file size, release notes, and download button. Install the APK on an Android device/emulator to confirm the signed package can be installed. Release notes are GitHub-generated unless you edit them on the release page.
+Push a new version tag such as `v1.1.0`, or manually run the workflow from the GitHub Actions tab and enter the desired release version. A successful job verifies the APK signature and publishes `MoviesHub.apk` to GitHub Releases. The download page reads the release GitHub marks as latest; no download URL needs to be edited. A build fails if signing credentials or `TMDB_ACCESS_TOKEN` are missing.
 
 ## Netlify sites
 
-Keep the existing main app site at the repository root; the root `netlify.toml` publishes `www/`. Deploy the APK website as a second Netlify site connected to this repository, with **Base directory** set to `download-site`. That site uses `download-site/netlify.toml` and publishes `.`. The per-site ignore rules skip builds for commits that do not change that site's files.
+Both Netlify sites use the repository root as their **Base directory** (leave this field blank). On the main app site, leave **Package directory** blank; the root `netlify.toml` publishes `www/` and deploys `netlify/functions/`. On the APK site, set **Package directory** to `download-site`; its `netlify.toml` publishes `download-site/` and uses `netlify/download-site-functions/`. Do not set the main app's Package directory to `download-site`, or it will serve the APK page instead. Each site's ignore rule skips commits outside its source files.

@@ -1,7 +1,7 @@
 const repo = 'balocruz/Movie';
 const api = '/.netlify/functions/github-releases';
 const publicApi = `https://api.github.com/repos/${repo}/releases?per_page=20`;
-const fallbackNotes = 'Improvements and fixes for a smoother MoviesHub experience.';
+const fallbackNotes = 'No release notes were added for this version.';
 const dateFormat = new Intl.DateTimeFormat(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
 const escapeHTML = (value) => String(value).replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
 function apkAsset(release) {

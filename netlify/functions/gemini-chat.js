@@ -19,10 +19,22 @@ function getAllowedOrigins() {
     ].filter(Boolean));
 }
 
-function getCorsHeaders(origin) {
+function isRequestOrigin(origin, headers) {
+    if (!origin) return false;
+    try {
+        const originHost = new URL(origin).host.toLowerCase();
+        const forwardedHost = headers["x-forwarded-host"] || headers["X-Forwarded-Host"];
+        const requestHost = forwardedHost || headers.host || headers.Host || "";
+        return requestHost.split(",").some((host) => host.trim().toLowerCase() === originHost);
+    } catch {
+        return false;
+    }
+}
+
+function getCorsHeaders(origin, requestHeaders = {}) {
     if (!origin) return {};
     const allowedOrigins = getAllowedOrigins();
-    if (!allowedOrigins.has(origin)) return null;
+    if (!allowedOrigins.has(origin) && !isRequestOrigin(origin, requestHeaders)) return null;
     return {
         "Access-Control-Allow-Origin": origin,
         "Access-Control-Allow-Methods": "POST, OPTIONS",
@@ -74,7 +86,7 @@ function validateMessages(messages) {
 
 exports.handler = async (event) => {
     const origin = event.headers?.origin || event.headers?.Origin || "";
-    const corsHeaders = getCorsHeaders(origin);
+    const corsHeaders = getCorsHeaders(origin, event.headers || {});
     if (corsHeaders === null) return respond(403, { error: "This app origin is not allowed." });
 
     if (event.httpMethod === "OPTIONS") {
