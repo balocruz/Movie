@@ -8,7 +8,11 @@ if (fs.existsSync(envPath)) dotenv.config({ path: envPath });
 const token = process.env.TMDB_ACCESS_TOKEN?.trim();
 if (!token) throw new Error("TMDB_ACCESS_TOKEN is missing. Set it in .env or the deployment environment.");
 const webGeminiFunctionUrl = "/.netlify/functions/gemini-chat";
-const androidGeminiFunctionUrl = process.env.GEMINI_FUNCTION_URL?.trim() || webGeminiFunctionUrl;
+const androidGeminiFunctionUrl = "https://cruzflix.netlify.app/.netlify/functions/gemini-chat";
+
+if (new URL(androidGeminiFunctionUrl).protocol !== "https:") {
+    throw new Error("The Android chat function URL must use HTTPS.");
+}
 
 function configFor(geminiFunctionUrl) {
     return `export const TMDB_ACCESS_TOKEN = ${JSON.stringify(token)};\nexport const GEMINI_FUNCTION_URL = ${JSON.stringify(geminiFunctionUrl)};\n`;

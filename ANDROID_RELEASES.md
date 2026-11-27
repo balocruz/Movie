@@ -13,7 +13,6 @@ In GitHub, open **Settings > Secrets and variables > Actions > New repository se
 | `ANDROID_KEY_ALIAS` | Signing key alias |
 | `ANDROID_KEY_PASSWORD` | Signing key password |
 | `TMDB_ACCESS_TOKEN` | The TMDB access token used by the app |
-| `GEMINI_FUNCTION_URL` | Optional public URL for the Netlify chat function used by native Android |
 
 Keep a secure backup of the keystore. Future APKs must use the same signing key for Android to recognize them as updates. Never commit the keystore or its passwords. The workflow writes the decoded keystore only to the temporary GitHub runner directory.
 
