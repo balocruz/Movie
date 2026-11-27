@@ -1,0 +1,33 @@
+.app-preview {
+  position: relative;
+  z-index: 1;
+  width: min(620px, 100%);
+  margin: 0;
+  padding: 8px;
+  overflow: hidden;
+  border: 1px solid #424955;
+  border-radius: 14px;
+  background: #11141b;
+  box-shadow: 0 28px 70px #0009, 0 0 45px #f0435110;
+  transform: perspective(1100px) rotateY(-5deg) rotateX(2deg);
+}
+.preview-toolbar {
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 7px 7px;
+  color: #aeb4c0;
+  font-size: 9px;
+}
+.preview-mark { display: inline-flex; align-items: center; gap: 5px; font-weight: 700; }
+.preview-mark img { width: 16px; height: 16px; }
+.preview-dots { color: #6f7683; font-size: 7px; letter-spacing: 2px; }
+.app-screenshot { display: block; width: 100%; height: auto; border: 1px solid #292e38; border-radius: 6px; }
+.app-preview figcaption { padding: 8px 4px 1px; color: #969dab; font-size: 9px; letter-spacing: .04em; }
+@media (max-width: 720px) {
+  .app-preview { width: min(100%, 500px); transform: perspective(1100px) rotateY(-2deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .app-preview { transform: none; }
+}

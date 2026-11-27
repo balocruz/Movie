@@ -1,5 +1,4 @@
 [build]
 base = "."
-command = "npm run build:config"
-publish = "www"
+publish = "download-site"
 functions = "netlify/functions"
