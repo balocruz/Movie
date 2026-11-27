@@ -1,5 +1,11 @@
-import { GEMINI_FUNCTION_URL } from "./config.js";
+import { GEMINI_FUNCTION_URL, GEMINI_NATIVE_FUNCTION_URL } from "./config.js";
 import { apiGet, imageUrl, mediaTitle } from "./api.js";
+
+function getGeminiFunctionUrl() {
+    const isNativeOrigin = window.location.protocol === "capacitor:"
+        || (window.location.protocol === "https:" && window.location.hostname === "localhost");
+    return isNativeOrigin ? GEMINI_NATIVE_FUNCTION_URL : GEMINI_FUNCTION_URL;
+}
 
 export function createChat({ page, messages, welcome, form, input, sendButton, onOpen }) {
     const history = [];
@@ -187,7 +193,7 @@ export function createChat({ page, messages, welcome, form, input, sendButton, o
         setBusy(true);
 
         try {
-            const response = await fetch(GEMINI_FUNCTION_URL, {
+            const response = await fetch(getGeminiFunctionUrl(), {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ messages: history.slice(-20) })
@@ -212,6 +218,7 @@ export function createChat({ page, messages, welcome, form, input, sendButton, o
         } catch (error) {
             pending.remove();
             history.pop();
+            console.error("MoviesHub AI request failed:", error);
             appendMessage(error.message || "Couldn't connect to the assistant. Please try again.", "assistant", [], "chat-message-error");
         } finally {
             setBusy(false);

@@ -14,6 +14,7 @@ function getAllowedOrigins() {
         ...configuredOrigins,
         process.env.URL,
         process.env.DEPLOY_PRIME_URL,
+        "http://localhost",
         "https://localhost",
         "capacitor://localhost"
     ].filter(Boolean));

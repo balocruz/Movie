@@ -15,7 +15,7 @@ if (new URL(androidGeminiFunctionUrl).protocol !== "https:") {
 }
 
 function configFor(geminiFunctionUrl) {
-    return `export const TMDB_ACCESS_TOKEN = ${JSON.stringify(token)};\nexport const GEMINI_FUNCTION_URL = ${JSON.stringify(geminiFunctionUrl)};\n`;
+    return `export const TMDB_ACCESS_TOKEN = ${JSON.stringify(token)};\nexport const GEMINI_FUNCTION_URL = ${JSON.stringify(geminiFunctionUrl)};\nexport const GEMINI_NATIVE_FUNCTION_URL = ${JSON.stringify(androidGeminiFunctionUrl)};\n`;
 }
 
 const webConfigPath = path.join(projectRoot, "www/js/config.js");
