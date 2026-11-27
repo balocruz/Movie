@@ -18,6 +18,7 @@ html, body {
   width: 100%;
   max-width: 100vw;
   overflow-x: hidden;
+  overscroll-behavior-y: none;
   background-color: var(--bg-color);
   color: var(--text-color);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
@@ -942,6 +943,71 @@ main {
 .player-container.pip-mode .close-mini-player { display: inline-flex; width: 34px; padding: 4px; font-size: 1.15rem; }
 .player-container.pip-mode .player-stage { flex: 0 0 auto; border: 0; box-shadow: none; }
 .player-container.pip-mode .video-wrapper { flex: 0 0 auto; width: 100%; max-height: none; aspect-ratio: 16 / 9; }
+.player-container.pip-mode .player-heading {
+  min-height: 34px;
+  padding: 5px 8px;
+  border-radius: 5px;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+.player-container.pip-mode .player-heading:active { cursor: grabbing; }
+.player-resize-handle {
+  display: none;
+  position: absolute;
+  right: 3px;
+  bottom: 3px;
+  z-index: 2;
+  width: 32px;
+  height: 32px;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  border: 0;
+  border-radius: 5px;
+  color: #fff;
+  background: rgba(15, 17, 18, .82);
+  cursor: nwse-resize;
+  touch-action: none;
+}
+.player-resize-handle svg { width: 100%; height: 100%; }
+.player-container.pip-mode .player-resize-handle { display: flex; }
+
+body.native-pip-mode #browse-page { display: none !important; }
+body.native-pip-mode .player-container {
+  position: fixed !important;
+  inset: 0 !important;
+  display: flex !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  height: 100dvh !important;
+  max-height: none !important;
+  gap: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: #000 !important;
+  box-shadow: none !important;
+}
+body.native-pip-mode .player-container .player-header,
+body.native-pip-mode .player-container #tv-controls-host,
+body.native-pip-mode .player-container .player-resize-handle { display: none !important; }
+body.native-pip-mode .player-container .player-stage {
+  display: flex;
+  flex: 1 1 auto;
+  width: 100%;
+  min-height: 0;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+body.native-pip-mode .player-container .video-wrapper {
+  width: 100%;
+  height: 100%;
+  max-height: none;
+  aspect-ratio: auto;
+  border-radius: 0;
+}
 
 @media (max-width: 760px) {
   .player-container { gap: 8px; padding-left: max(10px, env(safe-area-inset-left)); padding-right: max(10px, env(safe-area-inset-right)); }
@@ -1166,6 +1232,7 @@ main {
 
 .grid-container .movie-card { width: 100%; }
 .state-message { color: #b7bec0; }
+.offline-state p { margin: 0 0 16px; }
 
 .details-page { max-width: 1500px; min-height: 0; padding-bottom: 24px; }
 .back-button {

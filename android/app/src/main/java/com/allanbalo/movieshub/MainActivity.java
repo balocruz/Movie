@@ -1,7 +1,9 @@
 package com.allanbalo.movieshub;
 
 import android.annotation.SuppressLint;
+import android.app.PictureInPictureParams;
 import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Message;
@@ -10,6 +12,7 @@ import android.view.ViewGroup;
 import android.view.WindowInsets;
 import android.view.WindowInsetsController;
 import android.view.WindowManager;
+import android.util.Rational;
 import android.webkit.CookieManager;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
@@ -58,6 +61,7 @@ public class MainActivity extends BridgeActivity {
         if (webView != null) {
             // Enable Hardware Acceleration on WebView layer level too
             webView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+            webView.setOverScrollMode(View.OVER_SCROLL_NEVER);
 
             // 1. Block Popup Windows & Enable Full-Screen Video Support
             chromeClient = new BridgeWebChromeClient(this.bridge) {
@@ -258,6 +262,50 @@ public class MainActivity extends BridgeActivity {
             CookieManager cookieManager = CookieManager.getInstance();
             cookieManager.setAcceptCookie(true);
             cookieManager.setAcceptThirdPartyCookies(webView, true);
+        }
+    }
+
+    @Override
+    public void onUserLeaveHint() {
+        super.onUserLeaveHint();
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O || bridge == null || customView != null || isInPictureInPictureMode()) {
+            return;
+        }
+
+        WebView webView = bridge.getWebView();
+        if (webView == null) {
+            return;
+        }
+
+        webView.evaluateJavascript(
+            "(function(){var p=document.getElementById('player-container');var f=document.getElementById('player');" +
+                "return !!p&&!!f&&(p.classList.contains('player-open')||p.classList.contains('pip-mode'))&&!!f.getAttribute('src');})()",
+            result -> {
+                if (!"true".equals(result) || isFinishing() || isInPictureInPictureMode()) {
+                    return;
+                }
+
+                webView.evaluateJavascript("document.body.classList.add('native-pip-mode')", null);
+                PictureInPictureParams params = new PictureInPictureParams.Builder()
+                    .setAspectRatio(new Rational(16, 9))
+                    .build();
+                if (!enterPictureInPictureMode(params)) {
+                    webView.evaluateJavascript("document.body.classList.remove('native-pip-mode')", null);
+                }
+            }
+        );
+    }
+
+    @Override
+    public void onPictureInPictureModeChanged(boolean isInPictureInPictureMode, Configuration newConfig) {
+        super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig);
+        WebView webView = bridge == null ? null : bridge.getWebView();
+        if (webView != null) {
+            webView.evaluateJavascript(
+                "document.body.classList.toggle('native-pip-mode'," + isInPictureInPictureMode + ")",
+                null
+            );
         }
     }
 }

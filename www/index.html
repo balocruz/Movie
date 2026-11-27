@@ -105,7 +105,7 @@
     <section id="player-container" class="player-container" aria-label="Video player">
         <div class="player-header">
             <button id="close-pip-btn" class="player-action player-back" type="button" aria-label="Close player">← Browse</button>
-            <div class="player-heading" aria-live="polite">
+            <div class="player-heading" aria-live="polite" title="Drag to move mini-player">
                 <p class="player-eyebrow">NOW PLAYING</p>
                 <h2 id="player-title" class="player-title">Now Playing</h2>
                 <p id="player-subtitle" class="player-subtitle"></p>
@@ -129,6 +129,14 @@
                 </iframe>
             </div>
         </div>
+        <button id="resize-mini-player-btn" class="player-resize-handle" type="button" aria-label="Resize mini-player" title="Drag to resize mini-player">
+            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <path d="M14 20h6v-6"></path>
+                <path d="m20 14-8 8"></path>
+                <path d="M20 8v-4h-4"></path>
+                <path d="m16 4-6 6"></path>
+            </svg>
+        </button>
     </section>
 
     <script type="module" src="js/app.js"></script>

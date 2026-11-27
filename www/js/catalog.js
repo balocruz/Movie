@@ -43,6 +43,11 @@ export function createCatalog({ container, onOpen, isPlaying, minimizePlayer }) 
         const requestId = ++catalogRequestId;
         currentCategory = null;
         container.replaceChildren();
+        if (!navigator.onLine) {
+            showOfflineState();
+            return;
+        }
+
         for (const category of CATEGORIES) {
             try {
                 const data = await apiGet(category.url);
@@ -52,6 +57,27 @@ export function createCatalog({ container, onOpen, isPlaying, minimizePlayer }) 
                 console.error(`Failed loading ${category.title}:`, error);
             }
         }
+        if (requestId === catalogRequestId && !container.childElementCount) {
+            showOfflineState();
+        }
+    }
+
+    function showOfflineState() {
+        const status = document.createElement("div");
+        status.className = "state-message offline-state";
+        status.setAttribute("role", "status");
+
+        const message = document.createElement("p");
+        message.textContent = navigator.onLine
+            ? "Couldn't load movies and shows. Check your connection and try again."
+            : "You're offline. Connect to the internet, then try again.";
+        const retry = document.createElement("button");
+        retry.className = "secondary-action";
+        retry.type = "button";
+        retry.textContent = "Retry";
+        retry.addEventListener("click", loadHome);
+        status.append(message, retry);
+        container.replaceChildren(status);
     }
 
     async function loadGenre(movieGenreId, tvGenreId, genreName) {
@@ -166,6 +192,9 @@ export function createCatalog({ container, onOpen, isPlaying, minimizePlayer }) 
 
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("touchmove", onScroll, { passive: true });
+    window.addEventListener("online", () => {
+        if (container.querySelector(".offline-state")) loadHome();
+    });
 
     return { loadHome, loadGenre, showResults, showMessage };
 }

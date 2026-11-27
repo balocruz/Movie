@@ -8,10 +8,18 @@ export function createPlayer({ onHistoryChange }) {
     const subtitle = document.getElementById("player-subtitle");
     const controlsHost = document.getElementById("tv-controls-host");
     const minimizeButton = document.getElementById("pip-player-btn");
+    const miniPlayerDragHandle = document.querySelector(".player-heading");
+    const miniPlayerResizeHandle = document.getElementById("resize-mini-player-btn");
     let playing = false;
     let requestId = 0;
     let selectedItem = null;
     let selectedType = "movie";
+
+    function resetMiniPlayerGeometry() {
+        ["left", "top", "right", "bottom", "width"].forEach((property) => {
+            container.style.removeProperty(property);
+        });
+    }
 
     const servers = [
         ["superembed", "Server 1 (SuperEmbed)"],
@@ -24,6 +32,7 @@ export function createPlayer({ onHistoryChange }) {
     ];
 
     function show() {
+        resetMiniPlayerGeometry();
         container.classList.remove("pip-mode");
         container.classList.add("player-open");
         document.body.classList.add("player-is-open");
@@ -227,6 +236,87 @@ export function createPlayer({ onHistoryChange }) {
             console.error("Could not change fullscreen mode:", error);
         }
     });
+
+    miniPlayerDragHandle.addEventListener("pointerdown", (event) => {
+        if (!container.classList.contains("pip-mode") || event.button !== 0) return;
+        event.preventDefault();
+        const rect = container.getBoundingClientRect();
+        const startX = event.clientX;
+        const startY = event.clientY;
+        const startLeft = rect.left;
+        const startTop = rect.top;
+        container.style.left = `${rect.left}px`;
+        container.style.top = `${rect.top}px`;
+        container.style.right = "auto";
+        container.style.bottom = "auto";
+        miniPlayerDragHandle.setPointerCapture(event.pointerId);
+
+        const move = (pointerEvent) => {
+            const maxLeft = Math.max(8, window.innerWidth - rect.width - 8);
+            const maxTop = Math.max(8, window.innerHeight - rect.height - 8);
+            const left = Math.min(maxLeft, Math.max(8, startLeft + pointerEvent.clientX - startX));
+            const top = Math.min(maxTop, Math.max(8, startTop + pointerEvent.clientY - startY));
+            container.style.left = `${left}px`;
+            container.style.top = `${top}px`;
+        };
+        const stop = () => {
+            miniPlayerDragHandle.removeEventListener("pointermove", move);
+            miniPlayerDragHandle.removeEventListener("pointerup", stop);
+            miniPlayerDragHandle.removeEventListener("pointercancel", stop);
+        };
+
+        miniPlayerDragHandle.addEventListener("pointermove", move);
+        miniPlayerDragHandle.addEventListener("pointerup", stop, { once: true });
+        miniPlayerDragHandle.addEventListener("pointercancel", stop, { once: true });
+    });
+
+    miniPlayerResizeHandle.addEventListener("pointerdown", (event) => {
+        if (!container.classList.contains("pip-mode") || event.button !== 0) return;
+        event.preventDefault();
+        event.stopPropagation();
+        const rect = container.getBoundingClientRect();
+        const headerHeight = container.querySelector(".player-header").getBoundingClientRect().height;
+        const startX = event.clientX;
+        const startWidth = rect.width;
+        container.style.left = `${rect.left}px`;
+        container.style.top = `${rect.top}px`;
+        container.style.right = "auto";
+        container.style.bottom = "auto";
+        miniPlayerResizeHandle.setPointerCapture(event.pointerId);
+
+        const move = (pointerEvent) => {
+            const minWidth = Math.min(210, window.innerWidth - 16);
+            const maxByWidth = window.innerWidth - 16;
+            const availableHeight = window.innerHeight - rect.top - headerHeight - 34;
+            const maxByHeight = Math.max(minWidth, availableHeight * 16 / 9);
+            const maxWidth = Math.max(minWidth, Math.min(maxByWidth, maxByHeight));
+            const width = Math.min(maxWidth, Math.max(minWidth, startWidth + pointerEvent.clientX - startX));
+            container.style.width = `${width}px`;
+        };
+        const stop = () => {
+            miniPlayerResizeHandle.removeEventListener("pointermove", move);
+            miniPlayerResizeHandle.removeEventListener("pointerup", stop);
+            miniPlayerResizeHandle.removeEventListener("pointercancel", stop);
+        };
+
+        miniPlayerResizeHandle.addEventListener("pointermove", move);
+        miniPlayerResizeHandle.addEventListener("pointerup", stop, { once: true });
+        miniPlayerResizeHandle.addEventListener("pointercancel", stop, { once: true });
+    });
+
+    miniPlayerResizeHandle.addEventListener("keydown", (event) => {
+        if (!container.classList.contains("pip-mode") || !event.key.startsWith("Arrow")) return;
+        event.preventDefault();
+        const rect = container.getBoundingClientRect();
+        const headerHeight = container.querySelector(".player-header").getBoundingClientRect().height;
+        const minWidth = Math.min(210, window.innerWidth - 16);
+        const availableHeight = window.innerHeight - rect.top - headerHeight - 34;
+        const maxWidth = Math.max(minWidth, Math.min(window.innerWidth - 16, availableHeight * 16 / 9));
+        const increase = event.key === "ArrowRight" || event.key === "ArrowDown";
+        const width = Math.min(maxWidth, Math.max(minWidth, rect.width + (increase ? 16 : -16)));
+        container.style.width = `${width}px`;
+    });
+
     document.addEventListener("keydown", (event) => {
         if ((event.key === "Escape" || event.key === "Backspace") && container.classList.contains("player-open")) close();
     });
