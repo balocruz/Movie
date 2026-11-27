@@ -2,8 +2,15 @@ name: Android release
 
 on:
   push:
-    branches: [main]
+    tags:
+      - 'v*'
   workflow_dispatch:
+    inputs:
+      release_version:
+        description: Release version (without the leading v)
+        required: true
+        default: '1.0.7'
+        type: string
 
 permissions:
   contents: write
@@ -46,9 +53,16 @@ jobs:
       - name: Prepare Android release version
         id: version
         shell: bash
+        env:
+          RELEASE_VERSION: ${{ inputs.release_version }}
         run: |
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+            VERSION_NAME="${GITHUB_REF_NAME#v}"
+          else
+            VERSION_NAME="$RELEASE_VERSION"
+          fi
+          [[ "$VERSION_NAME" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo 'Release version must use x.y.z format'; exit 1; }
           VERSION_CODE=$((10000 + GITHUB_RUN_NUMBER))
-          VERSION_NAME="1.0.${GITHUB_RUN_NUMBER}"
           echo "code=$VERSION_CODE" >> "$GITHUB_OUTPUT"
           echo "name=$VERSION_NAME" >> "$GITHUB_OUTPUT"
           echo "tag=v$VERSION_NAME" >> "$GITHUB_OUTPUT"
@@ -101,5 +115,6 @@ jobs:
           name: MoviesHub ${{ steps.version.outputs.name }}
           target_commitish: ${{ github.sha }}
           generate_release_notes: true
+          make_latest: true
           files: dist/MoviesHub.apk
           fail_on_unmatched_files: true

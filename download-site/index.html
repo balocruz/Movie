@@ -3,30 +3,106 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#090b10">
-  <meta name="description" content="Get the latest MoviesHub Android app and see what's new.">
+  <meta name="theme-color" content="#0b0c0e">
+  <meta name="description" content="Discover MoviesHub for Android. Get the latest APK, release notes, and installation instructions.">
   <title>MoviesHub for Android</title>
-  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="styles.css">
-  <link rel="stylesheet" href="preview.css">
   <script src="app.js" defer></script>
 </head>
 <body>
-  <header class="topbar"><a class="brand" href="#top" aria-label="MoviesHub home"><img src="favicon.svg" alt=""><span>Movies<span class="accent">Hub</span></span></a><a class="nav-link" href="#install">Installation guide <span aria-hidden="true">↗</span></a></header>
+  <header class="site-header">
+    <div class="nav-shell">
+      <a class="brand" href="#top" aria-label="MoviesHub home">
+        <img src="favicon.svg" alt="">
+        <span>Movies<span class="brand-accent">Hub</span></span>
+      </a>
+      <nav class="main-nav" aria-label="Main navigation">
+        <a href="#whats-new">Release notes</a>
+        <a href="#versions">Versions</a>
+        <a href="#install">Install</a>
+      </nav>
+      <a class="nav-download" href="#download">Get the app <span aria-hidden="true">↗</span></a>
+    </div>
+  </header>
+
   <main id="top">
-    <section class="hero wrap">
-      <div class="hero-copy"><p class="eyebrow"><span class="live-dot"></span> THE MOVIESHUB ANDROID APP</p><h1>Your next<br><span class="accent">favorite story</span><br>starts here.</h1><p class="intro">Discover movies and series, keep your watchlist close, and find something great to watch.</p>
-        <div class="release-pill"><span class="pill-dot"></span><span id="version">Finding the latest release…</span></div>
-        <a id="download" class="button" href="#releases" aria-disabled="true"><span>↓</span> <span id="download-label">Loading download</span></a>
-        <p class="download-meta" id="release-meta">Connecting to GitHub Releases</p>
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="hero-backdrop" aria-hidden="true"></div>
+      <div class="hero-inner">
+        <div class="hero-copy">
+          <p class="eyebrow"><span class="eyebrow-line"></span> THE OFFICIAL MOVIESHUB ANDROID APP</p>
+          <h1 id="hero-title">Find your<br><span>next favorite.</span></h1>
+          <p class="hero-description">Explore movies and series, keep your list close, and find something worth watching.</p>
+          <div class="hero-actions">
+            <a id="download" class="button button-primary" href="#versions" aria-disabled="true">
+              <span id="download-label">Checking latest release</span>
+              <svg aria-hidden="true" viewBox="0 0 20 20" fill="none"><path d="M10 2.5v10m0 0 4-4m-4 4-4-4M3 14v2.5h14V14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </a>
+            <a class="button button-secondary" href="#install">How to install <span aria-hidden="true">↗</span></a>
+          </div>
+          <div class="hero-release" aria-live="polite">
+            <span class="release-status"><span class="status-dot"></span><span id="version">Latest Android release</span></span>
+            <span id="release-meta" class="release-meta">Loading release details</span>
+          </div>
+        </div>
       </div>
-      <div class="art"><figure class="app-preview"><div class="preview-toolbar"><span class="preview-mark"><img src="favicon.svg" alt=""> Movies<span class="accent">Hub</span></span><span class="preview-dots" aria-hidden="true">● ● ●</span></div><img class="app-screenshot" src="assets/movieshub-app.png" alt="MoviesHub app home screen showing navigation, movie categories, and movie collections"><figcaption>MoviesHub · Discover screen</figcaption></figure><span class="floating-note">Find your next<br><b>favorite story</b></span></div>
+      <a class="scroll-cue" href="#whats-new"><span>Discover MoviesHub</span><span class="scroll-line" aria-hidden="true"></span></a>
     </section>
-    <section class="info-strip wrap" aria-label="App highlights"><div><span class="info-icon">✦</span><span><b>Made for movie lovers</b><small>Discover something new</small></span></div><div><span class="info-icon">▤</span><span><b>Keep it together</b><small>Your list, in one place</small></span></div><div><span class="info-icon">◉</span><span><b>Android ready</b><small>Install in a few steps</small></span></div></section>
-    <section class="section wrap" id="whats-new"><div class="section-head"><div><p class="eyebrow">THE LATEST</p><h2>Fresh from the studio</h2></div><span id="release-date" class="date-label">Release notes</span></div><article class="release-card"><div class="release-number" id="release-number">—</div><div class="release-copy"><h3 id="release-title">Loading release notes</h3><div id="release-notes" class="notes">The latest published version will appear here.</div></div></article></section>
-    <section class="section wrap" id="releases"><div class="section-head"><div><p class="eyebrow">THE ARCHIVE</p><h2>Previous versions</h2></div><span class="date-label">Recent releases</span></div><div id="release-list" class="release-list"><p class="muted">Loading release history…</p></div></section>
-    <section class="section wrap install" id="install"><div class="install-intro"><p class="eyebrow">QUICK SETUP</p><h2>Up and running<br>in a moment.</h2><p>Install MoviesHub directly on your Android phone or tablet.</p><a href="#top" class="text-link">Get the latest APK ↑</a></div><ol class="steps"><li><span>01</span><div><b>Download the APK</b><p>Tap the download button above and wait for the file to finish.</p></div></li><li><span>02</span><div><b>Allow this installation</b><p>Open the downloaded file. If prompted, allow your browser or file manager to install unknown apps.</p></div></li><li><span>03</span><div><b>Install and enjoy</b><p>Confirm the install prompt, then open MoviesHub from your app list.</p></div></li></ol></section>
+
+    <section class="intro-section page-shell" aria-labelledby="intro-title">
+      <div class="section-kicker">A BETTER PLACE TO START</div>
+      <div class="intro-grid">
+        <h2 id="intro-title">Less searching.<br><span>More watching.</span></h2>
+        <p>MoviesHub brings discovery, your saved titles, and your recent watches together in one Android app.</p>
+      </div>
+      <div class="feature-grid">
+        <article class="feature-card"><span class="feature-index">01</span><h3>Discover</h3><p>Browse movies and series and follow the titles that catch your eye.</p></article>
+        <article class="feature-card"><span class="feature-index">02</span><h3>Keep your list</h3><p>Save titles for later and return to them from your library.</p></article>
+        <article class="feature-card"><span class="feature-index">03</span><h3>Pick up again</h3><p>Recently watched titles stay close when you come back.</p></article>
+      </div>
+    </section>
+
+    <section class="release-section" id="whats-new" aria-labelledby="release-heading">
+      <div class="page-shell">
+        <div class="section-heading">
+          <div><p class="section-kicker">THE LATEST BUILD</p><h2 id="release-heading">Release notes</h2></div>
+          <span id="release-date" class="section-date">Current release</span>
+        </div>
+        <article class="release-card">
+          <div class="release-card-version"><span class="version-caption">VERSION</span><strong id="release-number">—</strong></div>
+          <div class="release-card-body"><h3 id="release-title">Loading release notes</h3><div id="release-notes" class="release-notes">The latest published release will appear here.</div></div>
+          <a class="release-link" href="#download" aria-label="Download the latest release">Get this release <span aria-hidden="true">↗</span></a>
+        </article>
+      </div>
+    </section>
+
+    <section class="versions-section page-shell" id="versions" aria-labelledby="versions-heading">
+      <div class="section-heading">
+        <div><p class="section-kicker">THE ARCHIVE</p><h2 id="versions-heading">Previous versions</h2></div>
+        <span class="section-date">Published releases</span>
+      </div>
+      <div id="release-list" class="release-list"><p class="quiet-message">Loading release history</p></div>
+    </section>
+
+    <section class="install-section" id="install" aria-labelledby="install-heading">
+      <div class="page-shell install-grid">
+        <div class="install-copy"><p class="section-kicker">SET UP IN MINUTES</p><h2 id="install-heading">Ready when<br>you are.</h2><p>Download the APK on your Android device and follow these steps to install MoviesHub.</p></div>
+        <ol class="install-steps">
+          <li><span class="step-number">01</span><div><h3>Download the APK</h3><p>Choose the latest release and wait for the file to finish downloading.</p></div></li>
+          <li><span class="step-number">02</span><div><h3>Allow installation</h3><p>If Android asks, allow your browser or file manager to install unknown apps.</p></div></li>
+          <li><span class="step-number">03</span><div><h3>Install MoviesHub</h3><p>Open the downloaded file, confirm installation, then launch the app.</p></div></li>
+        </ol>
+      </div>
+    </section>
   </main>
-  <footer class="wrap footer"><a class="brand" href="#top"><img src="favicon.svg" alt=""><span>Movies<span class="accent">Hub</span></span></a><span>© <span id="year"></span> MoviesHub · Android downloads</span><a href="https://github.com/balocruz/Movie/releases" target="_blank" rel="noopener">View all GitHub releases ↗</a></footer>
+
+  <footer class="site-footer">
+    <div class="page-shell footer-inner">
+      <a class="brand" href="#top"><img src="favicon.svg" alt=""><span>Movies<span class="brand-accent">Hub</span></span></a>
+      <span>© <span id="year"></span> MoviesHub</span>
+      <a href="https://github.com/balocruz/Movie/releases" target="_blank" rel="noopener">Releases on GitHub <span aria-hidden="true">↗</span></a>
+    </div>
+  </footer>
 </body>
 </html>

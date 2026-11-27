@@ -1,6 +1,6 @@
 # MoviesHub APK download site
 
-This static vanilla HTML/CSS/JavaScript site is served from the repository's `download-site/` directory. It reads public release metadata from `balocruz/Movie` and links to the APK attached to each stable GitHub Release. No GitHub token is used in browser code.
+This static vanilla HTML/CSS/JavaScript site is served from the repository's `download-site/` directory. It reads public release metadata from `balocruz/Movie` through a small Netlify Function that caches successful responses. No GitHub token is used in browser code.
 
 ## Netlify setup
 
