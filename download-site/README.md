@@ -4,7 +4,7 @@ This static vanilla HTML/CSS/JavaScript site is served from the repository's `do
 
 ## Netlify setup
 
-Connect this repository to Netlify and leave the repository root as the base directory. The root `netlify.toml` sets `download-site` as the publish directory. The existing Android app remains in `www/`; it is not the download site's publish directory. The root config retains the existing `netlify/functions` location.
+Keep the existing Netlify site connected to the repository root; the root `netlify.toml` publishes the main app from `www/`. For the download site, create a second Netlify site connected to this repository and set its **Package directory** to `download-site`, leaving **Base directory** unset. Netlify will use this directory's `netlify.toml` for the download site. Each site's ignore rule skips builds when files outside that site change.
 
 ## Local preview
 

@@ -34,3 +34,7 @@ base64 -w 0 release-keystore.jks
 Push a commit to `main`, or manually run the workflow from the GitHub Actions tab. A successful job verifies the APK signature, then creates a release with the version tag and `MoviesHub.apk`. The download page updates from the public API on page load; no download URL needs to be edited. A build will fail early if signing credentials or `TMDB_ACCESS_TOKEN` are missing.
 
 To verify the full path, run the workflow manually, confirm the job succeeds, open its GitHub Release and download `MoviesHub.apk`, then visit the Netlify site and check the displayed version, file size, release notes, and download button. Install the APK on an Android device/emulator to confirm the signed package can be installed. Release notes are GitHub-generated unless you edit them on the release page.
+
+## Netlify sites
+
+Keep the existing main app site at the repository root; the root `netlify.toml` publishes `www/`. Deploy the APK website as a second Netlify site connected to this repository, with **Package directory** set to `download-site` and **Base directory** unset. That site uses `download-site/netlify.toml`. The per-site ignore rules skip builds for commits that do not change that site's files.
