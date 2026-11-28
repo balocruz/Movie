@@ -48,7 +48,7 @@ exports.handler = async function () {
     headers: {
       'Content-Type': 'application/json; charset=utf-8',
       'Cache-Control': 'public, max-age=300',
-      'Netlify-CDN-Cache-Control': 'public, durable, max-age=900, stale-while-revalidate=3600'
+      'Netlify-CDN-Cache-Control': 'public, durable, max-age=300, stale-while-revalidate=300'
     },
     body: JSON.stringify(orderedReleases)
   };

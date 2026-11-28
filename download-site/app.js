@@ -1,5 +1,5 @@
 const repo = 'balocruz/Movie';
-const api = '/.netlify/functions/github-releases';
+const api = '/.netlify/functions/github-releases?v=2';
 const publicApi = `https://api.github.com/repos/${repo}/releases?per_page=20`;
 const fallbackNotes = 'No notes were included with this update.';
 const dateFormat = new Intl.DateTimeFormat(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
