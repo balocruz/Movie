@@ -5,6 +5,10 @@
   --text-color: #ffffff;
   --text-muted: #b3b3b3;
   --focus-ring: #ffffff;
+  --native-safe-area-top: 0px;
+  --native-safe-area-right: 0px;
+  --native-safe-area-bottom: 0px;
+  --native-safe-area-left: 0px;
 }
 
 /* Prevent Horizontal Overflow / Page Extension on Mobile */
@@ -3361,6 +3365,16 @@ main {
   overflow: hidden;
   background: #171113;
 }
+.featured-slides::before,
+#details-page .details-shade::before {
+  position: absolute;
+  z-index: 1;
+  inset: 0 0 auto;
+  height: max(112px, calc(env(safe-area-inset-top) + 86px));
+  background: linear-gradient(180deg, rgba(4, 5, 6, 0.62), transparent);
+  content: "";
+  pointer-events: none;
+}
 .featured-slides::after {
   position: absolute;
   inset: 0;
@@ -5870,7 +5884,7 @@ main#browse-page {
   #browse-page:has(#featured-hero:not([hidden])) .app-header {
     position: absolute;
     z-index: 30;
-    top: max(8px, env(safe-area-inset-top));
+    top: max(8px, env(safe-area-inset-top), var(--native-safe-area-top));
     right: max(16px, env(safe-area-inset-right));
     left: max(16px, env(safe-area-inset-left));
     display: flex;
@@ -6613,5 +6627,192 @@ main#browse-page {
   #details-page .details-backdrop {
     inset: 0 0 auto;
     height: 82%;
+  }
+}
+
+/* Short landscape screens need a compact, full-bleed hero instead of the
+   portrait-sized minimum heights used by the regular desktop breakpoints. */
+@media (orientation: landscape) and (max-height: 760px) {
+  #browse-page:has(#featured-hero:not([hidden])),
+  #browse-page:has(#details-page:not([hidden])) {
+    position: relative;
+    padding-top: 0;
+  }
+
+  #browse-page:has(#featured-hero:not([hidden])) .app-header,
+  #browse-page:has(#details-page:not([hidden])) .app-header {
+    position: absolute;
+    z-index: 30;
+    top: max(8px, env(safe-area-inset-top), var(--native-safe-area-top));
+    right: clamp(18px, 3vw, 52px);
+    left: clamp(18px, 3vw, 52px);
+    min-height: 52px;
+    margin: 0;
+  }
+
+  #browse-page #featured-hero {
+    width: auto;
+    height: min(72svh, 500px);
+    min-height: 300px;
+    margin: 0 calc(0px - clamp(18px, 3vw, 52px)) 20px;
+    border-radius: 0;
+  }
+
+  #browse-page #featured-hero .featured-slides,
+  #browse-page #featured-hero .featured-slide,
+  #browse-page #featured-hero .featured-slide img {
+    width: 100%;
+    height: 100%;
+  }
+
+  #browse-page #featured-hero .featured-slide img {
+    object-fit: cover;
+    object-position: center 30%;
+  }
+
+  #browse-page #featured-hero .featured-copy {
+    width: min(620px, 64%);
+    max-height: 100%;
+    margin-left: clamp(22px, 5vw, 72px);
+    padding: max(76px, calc(var(--native-safe-area-top) + 60px)) 0 62px;
+    overflow: hidden;
+  }
+
+  #browse-page #featured-hero .featured-eyebrow {
+    margin-bottom: 8px;
+  }
+
+  #browse-page #featured-hero .featured-title {
+    display: -webkit-box;
+    max-width: 18ch;
+    margin-bottom: 8px;
+    overflow: hidden;
+    font-size: clamp(2rem, 4.6vw, 3.8rem);
+    line-height: 1;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  #browse-page #featured-hero .featured-meta,
+  #browse-page #featured-hero .featured-genres {
+    margin-bottom: 8px;
+  }
+
+  #browse-page #featured-hero .featured-overview {
+    display: -webkit-box;
+    max-width: 52ch;
+    margin-bottom: 12px;
+    overflow: hidden;
+    font-size: clamp(0.82rem, 1.25vw, 0.98rem);
+    line-height: 1.45;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  #browse-page #featured-hero .featured-actions button {
+    min-height: 42px;
+    padding-block: 8px;
+  }
+
+  #browse-page #featured-hero .featured-controls {
+    right: clamp(16px, 3vw, 40px);
+    bottom: 12px;
+  }
+
+  #browse-page:has(#details-page:not([hidden])) #details-page {
+    width: auto;
+    margin: 0 calc(0px - clamp(18px, 3vw, 52px));
+  }
+
+  #browse-page:has(#details-page:not([hidden])) #details-page .details-hero {
+    height: min(72svh, 500px);
+    min-height: 300px;
+    border-radius: 0;
+  }
+
+  #browse-page:has(#details-page:not([hidden])) #details-page .details-backdrop {
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 28%;
+  }
+
+  #browse-page:has(#details-page:not([hidden])) #details-page .details-copy {
+    width: min(720px, 68%);
+    padding: max(clamp(88px, 13svh, 112px), calc(var(--native-safe-area-top) + 60px)) clamp(22px, 5vw, 72px) 42px;
+  }
+
+  #browse-page:has(#details-page:not([hidden])) #details-page .details-title {
+    max-width: 18ch;
+    margin-bottom: 8px;
+    font-size: clamp(2.1rem, 4.5vw, 3.8rem);
+    line-height: 1;
+  }
+
+  #browse-page:has(#details-page:not([hidden])) #details-page .details-meta,
+  #browse-page:has(#details-page:not([hidden])) #details-page .details-genres {
+    margin-bottom: 10px;
+  }
+
+  #browse-page:has(#details-page:not([hidden])) #details-page .details-actions button {
+    min-height: 42px;
+    padding-block: 8px;
+  }
+
+  #browse-page:has(#details-page:not([hidden])) #details-page .back-button {
+    top: max(58px, 9svh, calc(var(--native-safe-area-top) + 10px));
+    left: clamp(18px, 3vw, 52px);
+  }
+}
+
+@media (orientation: landscape) and (max-height: 460px) {
+  #browse-page #featured-hero {
+    height: 78svh;
+    min-height: 250px;
+  }
+
+  #browse-page #featured-hero .featured-copy {
+    padding-top: max(42px, calc(var(--native-safe-area-top) + 52px));
+    padding-bottom: 40px;
+  }
+
+  #browse-page #featured-hero .featured-overview {
+    display: none;
+  }
+
+  #browse-page:has(#details-page:not([hidden])) #details-page .details-hero {
+    height: 78svh;
+    min-height: 250px;
+  }
+
+  #browse-page:has(#details-page:not([hidden])) #details-page .details-copy {
+    padding-top: max(66px, calc(var(--native-safe-area-top) + 52px));
+    padding-bottom: 24px;
+  }
+}
+
+/* Keep web content clear of Android's system bars when drawing edge to edge. */
+@media (max-width: 760px) {
+  #browse-page:not(:has(#featured-hero:not([hidden]))):not(:has(#details-page:not([hidden]))) {
+    padding-top: max(12px, env(safe-area-inset-top), var(--native-safe-area-top));
+  }
+
+  #browse-page:has(#featured-hero:not([hidden])) .app-header,
+  #browse-page:has(#details-page:not([hidden])) #details-page .back-button {
+    top: max(12px, env(safe-area-inset-top), var(--native-safe-area-top));
+  }
+
+  .primary-nav {
+    padding-bottom: calc(
+      9px + max(env(safe-area-inset-bottom), var(--native-safe-area-bottom))
+    );
+  }
+}
+
+@media (min-width: 761px) {
+  .primary-nav {
+    top: max(72px, env(safe-area-inset-top), var(--native-safe-area-top));
+    bottom: max(20px, env(safe-area-inset-bottom), var(--native-safe-area-bottom));
   }
 }

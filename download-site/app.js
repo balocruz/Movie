@@ -1,6 +1,7 @@
 const repo = 'balocruz/Movie';
 const api = '/.netlify/functions/github-releases?v=2';
 const publicApi = `https://api.github.com/repos/${repo}/releases?per_page=20`;
+const autoDownloadLatest = new URLSearchParams(window.location.search).get('download') === 'latest';
 const fallbackNotes = 'No notes were included with this update.';
 const dateFormat = new Intl.DateTimeFormat(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
 const escapeHTML = (value) => String(value).replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
@@ -50,6 +51,15 @@ async function fetchReleases() {
   if (!response.ok) throw new Error(body.error || `Release service returned ${response.status}`);
   return body;
 }
+function startRequestedDownload() {
+  if (!autoDownloadLatest) return;
+  const link = document.querySelector('#download');
+  if (!link || link.getAttribute('aria-disabled') !== 'false' || !link.href) return;
+
+  history.replaceState(null, '', `${window.location.pathname}${window.location.hash}`);
+  document.querySelector('#release-meta').textContent = 'Starting the APK download. If it does not begin, tap Download APK.';
+  link.click();
+}
 function renderRelease(release, isLatest, notes) {
   const asset = apkAsset(release);
   const version = release.tag_name.replace(/^v/i, '');
@@ -78,9 +88,13 @@ async function loadReleases() {
   try {
     const releases = (await fetchReleases()).filter((release) => !release.draft && !release.prerelease && /^v?\d+\.\d+\.\d+$/.test(release.tag_name));
     if (!releases.length) throw new Error('No Android releases are available yet.');
-    const latestNotes = await releaseNotesFor(releases[0]);
+    const latest = releases[0];
     document.querySelector('#release-list').innerHTML = releases.slice(1).length ? releases.slice(1).map((release) => renderRelease(release, false)).join('') : '<p class="muted">This is the first release. Earlier versions will show up here when they’re available.</p>';
-    renderRelease(releases[0], true, latestNotes);
+    renderRelease(latest, true, latest.body || fallbackNotes);
+    startRequestedDownload();
+
+    const latestNotes = await releaseNotesFor(latest);
+    document.querySelector('#release-notes').innerHTML = renderNotes(latestNotes);
   } catch (error) {
     document.querySelector('#version').textContent = 'Couldn’t load the latest version';
     document.querySelector('#download-label').textContent = 'Download unavailable right now';

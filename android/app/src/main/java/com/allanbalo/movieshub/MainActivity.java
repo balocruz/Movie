@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.app.PictureInPictureParams;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Message;
@@ -21,6 +22,11 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.FrameLayout;
 import androidx.activity.OnBackPressedCallback;
+import androidx.core.graphics.Insets;
+import androidx.core.view.WindowCompat;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsControllerCompat;
+import androidx.core.view.WindowInsetsCompat;
 import com.getcapacitor.BridgeActivity;
 import com.getcapacitor.BridgeWebChromeClient;
 import com.getcapacitor.BridgeWebViewClient;
@@ -46,6 +52,10 @@ public class MainActivity extends BridgeActivity {
 
         super.onCreate(savedInstanceState);
 
+        // Draw the app behind Android's status and navigation bars. The web UI
+        // applies safe-area padding to interactive controls so they stay usable.
+        configureEdgeToEdgeWindow();
+
         // Register modern OnBackPressedCallback for predictive back gestures and custom view exit
         onBackPressedCallback = new OnBackPressedCallback(false) {
             @Override
@@ -59,6 +69,12 @@ public class MainActivity extends BridgeActivity {
 
         final WebView webView = this.bridge.getWebView();
         if (webView != null) {
+            ViewCompat.setOnApplyWindowInsetsListener(webView, (view, insets) -> {
+                applySafeAreaCss(webView, insets);
+                return insets;
+            });
+            ViewCompat.requestApplyInsets(webView);
+
             // Enable Hardware Acceleration on WebView layer level too
             webView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
             webView.setOverScrollMode(View.OVER_SCROLL_NEVER);
@@ -132,10 +148,11 @@ public class MainActivity extends BridgeActivity {
                         if (controller != null) {
                             controller.show(WindowInsets.Type.statusBars() | WindowInsets.Type.navigationBars());
                         }
-                    } else {
-                        int flags = View.SYSTEM_UI_FLAG_VISIBLE;
-                        decor.setSystemUiVisibility(flags);
                     }
+
+                    // Reapply edge-to-edge after exiting immersive video. On older
+                    // Android versions this also restores the layout system flags.
+                    configureEdgeToEdgeWindow();
 
                     setRequestedOrientation(requestedOrientationBeforeFullscreen);
                 }
@@ -229,6 +246,7 @@ public class MainActivity extends BridgeActivity {
                 @Override
                 public void onPageFinished(WebView view, String url) {
                     super.onPageFinished(view, url);
+                    applySafeAreaCss(view, ViewCompat.getRootWindowInsets(view));
                     // Inject CSS to hide common ad overlays that might still load inside the page
                     String cssInjection = "javascript:(function() {" +
                             "var style = document.createElement('style');" +
@@ -263,6 +281,43 @@ public class MainActivity extends BridgeActivity {
             cookieManager.setAcceptCookie(true);
             cookieManager.setAcceptThirdPartyCookies(webView, true);
         }
+    }
+
+    private void configureEdgeToEdgeWindow() {
+        android.view.Window window = getWindow();
+        WindowCompat.setDecorFitsSystemWindows(window, false);
+        window.setStatusBarColor(Color.TRANSPARENT);
+        window.setNavigationBarColor(Color.TRANSPARENT);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            window.setNavigationBarDividerColor(Color.TRANSPARENT);
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            window.setStatusBarContrastEnforced(false);
+            window.setNavigationBarContrastEnforced(false);
+        }
+
+        WindowInsetsControllerCompat bars = new WindowInsetsControllerCompat(window, window.getDecorView());
+        bars.setAppearanceLightStatusBars(false);
+        bars.setAppearanceLightNavigationBars(false);
+    }
+
+    private void applySafeAreaCss(WebView webView, WindowInsetsCompat insets) {
+        if (webView == null || insets == null) {
+            return;
+        }
+
+        Insets safe = insets.getInsets(
+            WindowInsetsCompat.Type.systemBars() | WindowInsetsCompat.Type.displayCutout()
+        );
+        float density = getResources().getDisplayMetrics().density;
+        String script = "(function(){var s=document.documentElement.style;" +
+            "s.setProperty('--native-safe-area-top','" + (safe.top / density) + "px');" +
+            "s.setProperty('--native-safe-area-right','" + (safe.right / density) + "px');" +
+            "s.setProperty('--native-safe-area-bottom','" + (safe.bottom / density) + "px');" +
+            "s.setProperty('--native-safe-area-left','" + (safe.left / density) + "px');" +
+            "})();";
+        webView.evaluateJavascript(script, null);
     }
 
     @Override

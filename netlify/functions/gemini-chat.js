@@ -756,8 +756,13 @@ function getRequestPreferences(prompt) {
         : 5;
     const recommendationVerb = /\b(?:recommend(?:ation|ations)?|suggest(?:ion|ions)?|what should i watch|what to watch|similar to|like these|more like)\b/i.test(text)
         || /\b(?:movies?|films?|shows?|series)\s+like\b/i.test(text);
+    const countedWatchListRequest = Boolean(requestedCountMatch
+        && /\b(?:to watch|worth watching|to stream|to see)\b/i.test(text));
+    const rankedTitleListRequest = /\b(?:top|best)\s+(?:\d{1,2}|one|two|three|four|five|six|seven|eight|nine|ten)\b[\s\S]{0,60}\b(?:movies?|films?|shows?|series|titles?)\b/i.test(text);
     const wantsRecommendations = recommendationVerb
         || singularRecommendation
+        || countedWatchListRequest
+        || rankedTitleListRequest
         || Boolean(requestedCountMatch && /\b(?:find|list|give me|show me|name|pick)\b/i.test(text));
     const excludeWatched = /\b(?:not|haven't|have not|never) watched\b|\bunwatched\b|\bnew to me\b|\bnot seen\b|\bi(?:'ve| have) watched (?:those|these|them)(?: already)?\b|\balready watched (?:those|these|them)\b|\bi(?:'ve| have) already seen (?:those|these|them)\b/i.test(text);
     const explicitGenres = genres.length > 0;

@@ -1,4 +1,5 @@
 const RELEASES_URL = "https://allan-download-apk.netlify.app/.netlify/functions/github-releases?source=android-app";
+const UPDATE_DOWNLOAD_URL = "https://allan-download-apk.netlify.app/?download=latest";
 let updateCheckInProgress = false;
 let lastUpdateCheckAt = 0;
 
@@ -122,10 +123,9 @@ export async function checkForAppUpdate() {
             && releaseApk(item));
         if (!release) return;
 
-        const asset = releaseApk(release);
         const version = release.tag_name.replace(/^v/i, "");
         document.getElementById("app-update-version").textContent = `Version ${version}`;
-        document.getElementById("app-update-download").href = asset.browser_download_url;
+        document.getElementById("app-update-download").href = UPDATE_DOWNLOAD_URL;
         document.getElementById("app-update-notes").replaceChildren();
         appendReleaseNotes(document.getElementById("app-update-notes"), release.body);
 
