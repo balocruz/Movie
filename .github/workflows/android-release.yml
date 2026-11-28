@@ -66,6 +66,16 @@ jobs:
           echo "name=$VERSION_NAME" >> "$GITHUB_OUTPUT"
           echo "tag=v$VERSION_NAME" >> "$GITHUB_OUTPUT"
 
+      - name: Check release notes
+        env:
+          RELEASE_TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          NOTES="download-site/release-notes/${RELEASE_TAG}.md"
+          test -s "$NOTES" || {
+            echo "Add readable release notes to $NOTES before building this version."
+            exit 1
+          }
+
       - name: Prepare signing keystore
         shell: bash
         env:
@@ -121,7 +131,8 @@ jobs:
           tag_name: ${{ steps.version.outputs.tag }}
           name: MoviesHub ${{ steps.version.outputs.name }}
           target_commitish: ${{ github.sha }}
-          generate_release_notes: true
+          body_path: download-site/release-notes/${{ steps.version.outputs.tag }}.md
+          generate_release_notes: false
           make_latest: true
           files: dist/MoviesHub.apk
           fail_on_unmatched_files: true

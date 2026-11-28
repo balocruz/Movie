@@ -18,11 +18,15 @@
     <main id="browse-page">
         <!-- Top Navigation & Search -->
         <header class="app-header">
-            <h1 class="logo">Movies<span>Hub</span></h1>
+            <h1 class="logo"><img src="favicon.svg" alt="" width="34" height="34">Movies<span>Hub</span></h1>
             <nav class="primary-nav" aria-label="Main navigation">
+                <button class="nav-expand-toggle" id="nav-expand-toggle" type="button" aria-expanded="false" aria-label="Expand navigation" title="Expand navigation">
+                    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                    <span>Navigation</span>
+                </button>
                 <button class="nav-btn active" type="button" data-view="home" aria-current="page">
                     <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="m15.8 8.2-2.6 5.2-5 2.4 2.4-5z"></path></svg>
-                    <span>Discover</span>
+                    <span class="nav-label-full">Discover</span>
                 </button>
                 <button class="nav-btn" type="button" data-view="history" aria-label="Recently Watched">
                     <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>
@@ -31,31 +35,73 @@
                 </button>
                 <button class="nav-btn" type="button" data-view="my-list">
                     <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4.5A1.5 1.5 0 0 1 7.5 3h9A1.5 1.5 0 0 1 18 4.5V21l-6-3.5L6 21z"></path></svg>
-                    <span>My List</span>
+                    <span class="nav-label-full">My List</span>
                 </button>
                 <button class="nav-btn" type="button" data-view="chat">
                     <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11.5a7.5 7.5 0 0 1-7.5 7.5H6l-3 2v-6a7.5 7.5 0 1 1 17-3.5Z"></path><path d="M12.5 7.5v4m-2-2h4"></path></svg>
-                    <span>AI Chat</span>
+                    <span class="nav-label-full">Maya</span>
+                </button>
+                <button class="mobile-search-btn" id="mobile-search-btn" type="button" aria-label="Open search" aria-pressed="false">
+                    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="10.8" cy="10.8" r="6.8"></circle><path d="m16 16 4.5 4.5"></path></svg>
+                    <span>Search</span>
                 </button>
             </nav>
             <div class="search-box" id="search-box">
                 <label class="visually-hidden" for="search">Search movies and TV shows</label>
-                <input type="search" id="search" placeholder="Search movies, TV shows..." autocomplete="off" aria-controls="search-suggestions">
-                <button id="btn" type="button">Search</button>
-                <div id="search-suggestions" class="search-suggestions" role="listbox" aria-label="Search suggestions" hidden></div>
+                <input type="search" id="search" placeholder="Search movies, TV shows..." autocomplete="off" aria-controls="search-experience-content">
+                <button id="clear-search" class="clear-search-button" type="button" aria-label="Clear search" title="Clear search" hidden>
+                    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m6 6 12 12M18 6 6 18"></path></svg>
+                </button>
+                <button id="btn" type="button" aria-label="Search">
+                    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="10.8" cy="10.8" r="6.8"></circle><path d="m16 16 4.5 4.5"></path></svg>
+                    <span>Search</span>
+                </button>
             </div>
         </header>
 
         <div id="browse-content">
+            <section id="search-experience" class="search-experience" aria-label="Search and discovery" hidden>
+                <div id="search-experience-content"></div>
+            </section>
+            <section id="featured-hero" class="featured-hero is-loading" aria-label="Featured movies" aria-roledescription="carousel">
+                <div class="featured-slides" data-hero-slides aria-hidden="true"></div>
+                <div class="featured-copy" data-hero-copy>
+                    <p class="featured-eyebrow">Trending this week</p>
+                    <h2 class="featured-title" data-hero-title></h2>
+                    <p class="featured-meta" data-hero-meta></p>
+                    <div class="featured-genres" data-hero-genres></div>
+                    <p class="featured-overview" data-hero-overview></p>
+                    <div class="featured-actions">
+                        <button class="featured-play" type="button" data-hero-play>
+                            <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l10-6.5z"></path></svg>
+                            <span>Play</span>
+                        </button>
+                        <button class="featured-info" type="button" data-hero-info>More info</button>
+                    </div>
+                </div>
+                <div class="featured-status" data-hero-status role="status" aria-live="polite">
+                    <p data-hero-status-message>Loading this week’s featured titles…</p>
+                    <button class="secondary-action" type="button" data-hero-retry hidden>Try again</button>
+                </div>
+                <div class="featured-controls" aria-label="Carousel controls">
+                    <button class="featured-arrow" type="button" data-hero-previous aria-label="Previous featured title">
+                        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"></path></svg>
+                    </button>
+                    <div class="featured-dots" data-hero-dots role="group" aria-label="Choose a featured title"></div>
+                    <button class="featured-arrow" type="button" data-hero-next aria-label="Next featured title">
+                        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"></path></svg>
+                    </button>
+                </div>
+            </section>
             <nav class="genre-bar" id="genre-bar" aria-label="Browse by genre">
-                <button class="genre-btn active" data-genre="all" tabindex="0">All</button>
-                <button class="genre-btn" data-movie-genre="28" data-tv-genre="10759" tabindex="0">Action</button>
-                <button class="genre-btn" data-movie-genre="35" data-tv-genre="35" tabindex="0">Comedy</button>
-                <button class="genre-btn" data-movie-genre="18" data-tv-genre="18" tabindex="0">Drama</button>
-                <button class="genre-btn" data-movie-genre="878" data-tv-genre="10765" tabindex="0">Sci-Fi</button>
-                <button class="genre-btn" data-movie-genre="27" tabindex="0">Horror</button>
-                <button class="genre-btn" data-movie-genre="10749" tabindex="0">Romance</button>
-                <button class="genre-btn" data-movie-genre="16" data-tv-genre="16" tabindex="0">Animation</button>
+                <button class="genre-btn active" data-genre="all" aria-pressed="true">All</button>
+                <button class="genre-btn" data-movie-genre="28" data-tv-genre="10759" aria-pressed="false">Action</button>
+                <button class="genre-btn" data-movie-genre="35" data-tv-genre="35" aria-pressed="false">Comedy</button>
+                <button class="genre-btn" data-movie-genre="18" data-tv-genre="18" aria-pressed="false">Drama</button>
+                <button class="genre-btn" data-movie-genre="878" data-tv-genre="10765" aria-pressed="false">Sci-Fi</button>
+                <button class="genre-btn" data-movie-genre="27" data-tv-genre="27" aria-pressed="false">Horror</button>
+                <button class="genre-btn" data-movie-genre="10749" data-tv-genre="10749" aria-pressed="false">Romance</button>
+                <button class="genre-btn" data-movie-genre="16" data-tv-genre="16" aria-pressed="false">Animation</button>
             </nav>
             <div id="categories-container"></div>
         </div>
@@ -70,33 +116,72 @@
                     <h2 id="details-title" class="details-title">Loading title...</h2>
                     <p id="details-meta" class="details-meta"></p>
                     <div id="details-genres" class="details-genres"></div>
-                    <p id="details-overview" class="details-overview"></p>
                     <div class="details-actions">
-                        <button id="details-play" class="primary-action" type="button">Play</button>
+                        <button id="details-play" class="primary-action" type="button">Play Now</button>
                         <button id="details-list" class="secondary-action" type="button" aria-pressed="false">Add to My List</button>
                     </div>
                 </div>
             </div>
+            <p id="details-status" class="details-status" role="status" aria-live="polite" hidden>
+                <span id="details-status-message"></span>
+                <button id="details-retry" class="secondary-action" type="button" hidden>Try again</button>
+            </p>
+            <div class="details-content">
+                <section class="details-section" aria-labelledby="details-about-heading">
+                    <h3 id="details-about-heading">About this title</h3>
+                    <p id="details-full-overview" class="details-full-overview"></p>
+                    <dl id="details-facts" class="details-facts"></dl>
+                </section>
+                <section id="details-crew-section" class="details-section" aria-labelledby="details-crew-heading" hidden>
+                    <h3 id="details-crew-heading">Made by</h3>
+                    <div id="details-crew" class="details-crew"></div>
+                </section>
+                <section id="details-cast-section" class="details-section" aria-labelledby="details-cast-heading" hidden>
+                    <h3 id="details-cast-heading">Cast</h3>
+                    <div id="details-cast" class="details-person-row"></div>
+                </section>
+                <section id="details-tv-section" class="details-section details-tv-section" aria-labelledby="details-episodes-heading" hidden>
+                    <div class="details-tv-heading">
+                        <div>
+                            <p class="section-eyebrow">TV SERIES</p>
+                            <h3 id="details-episodes-heading">Episodes</h3>
+                        </div>
+                        <label class="details-season-label" for="details-season">Season
+                            <select id="details-season" aria-label="Choose a season"></select>
+                        </label>
+                    </div>
+                    <div id="details-episodes" class="details-episodes" aria-live="polite"></div>
+                </section>
+                <section id="details-recommendations-section" class="details-section" aria-labelledby="details-recommendations-heading" hidden>
+                    <h3 id="details-recommendations-heading">More like this</h3>
+                    <div id="details-recommendations" class="details-recommendations"></div>
+                </section>
+            </div>
         </section>
 
         <section id="chat-page" class="chat-page" aria-labelledby="chat-heading" hidden>
-            <h2 id="chat-heading" class="visually-hidden">MoviesHub AI chat</h2>
+            <h2 id="chat-heading" class="visually-hidden">Maya, your personal Movie and TV Assistant from MoviesHub</h2>
             <div id="chat-messages" class="chat-messages" role="log" aria-live="polite" aria-relevant="additions">
                 <div id="chat-welcome" class="chat-welcome">
                     <span class="chat-welcome-mark" aria-hidden="true">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.8 14.7 9l6.5 2.8-6.5 2.7-2.7 6.7-2.7-6.7L2.8 11.8 9.3 9z"></path><path d="m19 2 .8 1.8 1.7.7-1.7.8L19 7l-.8-1.7-1.7-.8 1.7-.7z"></path></svg>
                     </span>
-                    <h3>Welcome. What are you in the mood for?</h3>
-                    <p>Tell me what you'd like to watch, or ask about a movie.</p>
+                    <h3>Maya, your personal Movie and TV Assistant from MoviesHub.</h3>
+                    <p>Tell Maya what you enjoy or ask about a movie or show.</p>
                 </div>
             </div>
             <form id="chat-form" class="chat-form">
-                <label class="visually-hidden" for="chat-input">Ask MoviesHub AI</label>
-                <textarea id="chat-input" name="message" rows="1" maxlength="2000" placeholder="Ask for a movie recommendation or review..." required></textarea>
+                <label class="visually-hidden" for="chat-input">Ask Maya</label>
+                <textarea id="chat-input" name="message" rows="1" maxlength="2000" placeholder="Ask Maya what to watch..." required></textarea>
+                <button id="chat-mic" class="chat-voice-button" type="button" aria-label="Start voice input" title="Speak a question">
+                    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2.5" width="6" height="12" rx="3"></rect><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3.5M9 21.5h6"></path></svg>
+                    <span class="visually-hidden">Start voice input</span>
+                </button>
                 <button id="chat-send" class="primary-action" type="submit" aria-label="Send message">
                     <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21 3-7.5 18-3.8-7.7L2 9.5 21 3Z"></path><path d="M9.7 13.3 21 3"></path></svg>
                     <span class="visually-hidden">Send</span>
                 </button>
+                <span id="chat-voice-status" class="chat-voice-status" role="status" aria-live="polite" hidden></span>
             </form>
             <p class="chat-disclaimer">AI can make mistakes. Reviews are spoiler-free unless you ask for spoilers.</p>
         </section>

@@ -26,14 +26,26 @@ export function createMovieCard(item, { type, historyEntry, onOpen, saved = fals
     const metadata = document.createElement("span");
     metadata.className = "card-metadata";
     const rating = Number(item.vote_average);
-    const ratingLabel = document.createElement("span");
-    ratingLabel.textContent = `★ ${rating ? rating.toFixed(1) : "N/A"}`;
-    const yearLabel = document.createElement("span");
-    yearLabel.textContent = getYear(item.release_date || item.first_air_date);
+    if (Number.isFinite(rating) && rating > 0) {
+        const ratingLabel = document.createElement("span");
+        ratingLabel.className = "rating-label";
+        ratingLabel.setAttribute("aria-label", `Rated ${rating.toFixed(1)} out of 10`);
+        ratingLabel.textContent = `★ ${rating.toFixed(1)}`;
+        metadata.appendChild(ratingLabel);
+    }
+
+    const year = getYear(item.release_date || item.first_air_date);
+    if (/^\d{4}$/.test(year)) {
+        const yearLabel = document.createElement("span");
+        yearLabel.className = "year-label";
+        yearLabel.textContent = year;
+        metadata.appendChild(yearLabel);
+    }
+
     const typeLabel = document.createElement("span");
     typeLabel.className = "lang-badge";
     typeLabel.textContent = mediaType === "tv" ? "TV" : "FILM";
-    metadata.append(ratingLabel, yearLabel, typeLabel);
+    metadata.appendChild(typeLabel);
     info.appendChild(metadata);
 
     if (historyEntry && mediaType === "tv") {

@@ -1,7 +1,7 @@
 import { apiGet, CATEGORIES, imageUrl } from "./api.js";
 import { createMovieCard } from "./cards.js";
 
-export function createCatalog({ container, onOpen, isPlaying, minimizePlayer }) {
+export function createCatalog({ container, onOpen, isPlaying, minimizePlayer, onFeatured, onFeaturedError, onHomeReady, onHomeStart, onExpanded }) {
     let currentCategory = null;
     let currentPage = 1;
     let totalPages = 1;
@@ -41,19 +41,31 @@ export function createCatalog({ container, onOpen, isPlaying, minimizePlayer }) 
 
     async function loadHome() {
         const requestId = ++catalogRequestId;
+        onHomeStart?.();
         currentCategory = null;
         container.replaceChildren();
         if (!navigator.onLine) {
+            onFeaturedError?.();
+            onHomeReady?.();
             showOfflineState();
             return;
         }
 
-        for (const category of CATEGORIES) {
+        for (const [index, category] of CATEGORIES.entries()) {
             try {
                 const data = await apiGet(category.url);
                 if (requestId !== catalogRequestId) return;
+                if (index === 0) {
+                    onFeatured?.(data.results || []);
+                    onHomeReady?.();
+                }
                 renderCategory(category.title, data.results || [], category.type, category);
             } catch (error) {
+                if (requestId !== catalogRequestId) return;
+                if (index === 0) {
+                    onFeaturedError?.(error);
+                    onHomeReady?.();
+                }
                 console.error(`Failed loading ${category.title}:`, error);
             }
         }
@@ -132,6 +144,7 @@ export function createCatalog({ container, onOpen, isPlaying, minimizePlayer }) 
     async function showExpanded(category) {
         catalogRequestId++;
         currentCategory = category;
+        onExpanded?.();
         currentPage = 1;
         totalPages = 1;
         if (isPlaying()) minimizePlayer();

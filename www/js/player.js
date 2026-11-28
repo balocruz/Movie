@@ -1,7 +1,7 @@
 import { apiGet } from "./api.js";
 import { saveHistory } from "./storage.js";
 
-export function createPlayer({ onHistoryChange }) {
+export function createPlayer({ onHistoryChange, onPlayerVisibilityChange }) {
     const video = document.getElementById("player");
     const container = document.getElementById("player-container");
     const title = document.getElementById("player-title");
@@ -36,6 +36,7 @@ export function createPlayer({ onHistoryChange }) {
         container.classList.remove("pip-mode");
         container.classList.add("player-open");
         document.body.classList.add("player-is-open");
+        onPlayerVisibilityChange?.(true);
         minimizeButton.textContent = "Minimize";
         minimizeButton.setAttribute("aria-label", "Minimize player");
     }
@@ -64,6 +65,7 @@ export function createPlayer({ onHistoryChange }) {
         }
         video.src = "";
         playing = false;
+        onPlayerVisibilityChange?.(false);
     }
 
     function buildControls(type, seasons = []) {

@@ -32,7 +32,9 @@ base64 -w 0 release-keystore.jks
 
 ## Run and inspect a build
 
-Push a new version tag such as `v1.1.0`, or manually run the workflow from the GitHub Actions tab and enter the desired release version. A successful job verifies the APK signature and publishes `MoviesHub.apk` to GitHub Releases. The download page reads the release GitHub marks as latest; no download URL needs to be edited. A build fails if signing credentials or `TMDB_ACCESS_TOKEN` are missing.
+Before each release, add a short Markdown bullet list at `download-site/release-notes/vX.Y.Z.md` for that version (for example, `download-site/release-notes/v1.1.0.md`). The workflow uses that file as the GitHub release description, and the download page displays the same notes beside the APK. The build stops before signing if the notes file is missing.
+
+Push a new version tag such as `v1.1.0`, or manually run the workflow from the GitHub Actions tab and enter the desired release version. A successful job verifies the APK signature and publishes `MoviesHub.apk` to GitHub Releases. The download page reads the latest release and APK link automatically; no download URL needs to be edited. A build fails if the notes, signing credentials, or `TMDB_ACCESS_TOKEN` are missing.
 
 ## Netlify sites
 
