@@ -52,13 +52,18 @@ exports.handler = async function (event) {
     const orderedReleases = latestRelease
       ? [latestRelease, ...releases.filter((release) => release.id !== latestRelease.id)]
       : releases;
+    const isAndroidAppRequest = event?.queryStringParameters?.source === 'android-app';
+    const cacheControl = isAndroidAppRequest ? 'no-store' : 'public, max-age=300';
+    const headers = {
+      ...responseHeaders(cacheControl),
+      'Netlify-CDN-Cache-Control': isAndroidAppRequest
+        ? 'no-store'
+        : 'public, durable, max-age=300, stale-while-revalidate=300'
+    };
 
     return {
       statusCode: 200,
-      headers: {
-        ...responseHeaders('public, max-age=300'),
-        'Netlify-CDN-Cache-Control': 'public, durable, max-age=300, stale-while-revalidate=300'
-      },
+      headers,
       body: JSON.stringify(orderedReleases)
     };
   } catch {
