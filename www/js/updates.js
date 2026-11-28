@@ -1,4 +1,4 @@
-const RELEASES_URL = "https://allan-download-app.netlify.app/.netlify/functions/github-releases?source=android-app";
+const RELEASES_URL = "https://allan-download-apk.netlify.app/.netlify/functions/github-releases?source=android-app";
 let updateCheckInProgress = false;
 let lastUpdateCheckAt = 0;
 
