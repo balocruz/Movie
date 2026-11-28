@@ -67,6 +67,22 @@ export function createSearch({
         return header;
     }
 
+    function createSearchSkeletons(count = 6) {
+        return Array.from({ length: count }, () => {
+            const skeleton = document.createElement("div");
+            skeleton.className = "search-skeleton-card";
+            skeleton.setAttribute("aria-hidden", "true");
+            const poster = document.createElement("span");
+            poster.className = "search-skeleton-poster";
+            const title = document.createElement("span");
+            title.className = "search-skeleton-line search-skeleton-title";
+            const detail = document.createElement("span");
+            detail.className = "search-skeleton-line search-skeleton-detail";
+            skeleton.append(poster, title, detail);
+            return skeleton;
+        });
+    }
+
     function renderDiscovery() {
         const renderId = ++discoveryRequestId;
         content.replaceChildren();
@@ -116,6 +132,7 @@ export function createSearch({
         status.className = "state-message search-status";
         status.setAttribute("role", "status");
         status.textContent = "Loading popular titles...";
+        grid.replaceChildren(...createSearchSkeletons(8));
         trendingSection.append(grid, status);
         content.appendChild(trendingSection);
 
@@ -192,10 +209,27 @@ export function createSearch({
                 return true;
             });
             count.textContent = `${filtered.length} ${filtered.length === 1 ? "title" : "titles"}`;
-            grid.replaceChildren(...filtered.map((item) => createMovieCard(item, {
-                type: item.media_type,
-                onOpen
-            })));
+            if (activeType === "all") {
+                const groups = [
+                    { type: "movie", label: "Movies" },
+                    { type: "tv", label: "TV Shows" }
+                ].map(({ type, label }) => {
+                    const items = filtered.filter((item) => item.media_type === type);
+                    if (!items.length) return null;
+                    const section = document.createElement("section");
+                    section.className = "search-result-group";
+                    const heading = document.createElement("h3");
+                    heading.textContent = `${label} (${items.length})`;
+                    const cards = document.createElement("div");
+                    cards.className = "grid-container search-result-type-grid";
+                    cards.append(...items.map((item) => createMovieCard(item, { type, onOpen })));
+                    section.append(heading, cards);
+                    return section;
+                }).filter(Boolean);
+                grid.replaceChildren(...groups);
+            } else {
+                grid.replaceChildren(...filtered.map((item) => createMovieCard(item, { type: item.media_type, onOpen })));
+            }
             status.hidden = filtered.length > 0;
             if (!resultItems.length) {
                 status.textContent = "No results found. Try another title.";
@@ -301,7 +335,7 @@ export function createSearch({
             },
             setLoading() {
                 resultItems = [];
-                grid.replaceChildren();
+                grid.replaceChildren(...createSearchSkeletons(8));
                 count.textContent = "";
                 status.hidden = false;
                 status.textContent = "Searching...";

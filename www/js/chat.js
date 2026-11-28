@@ -114,14 +114,21 @@ export function createChat({ page, messages, welcome, form, input, micButton, vo
     }
 
     function appendRecommendations(container, recommendations) {
-        if (!Array.isArray(recommendations) || recommendations.length === 0) return;
+        if (!Array.isArray(recommendations) || recommendations.length === 0) return 0;
+        const cards = recommendations.slice(0, 10).map((recommendation) => ({
+            ...recommendation,
+            id: Number(recommendation?.id ?? recommendation?.tmdb_id),
+            media_type: recommendation?.media_type || recommendation?.mediaType
+        })).filter((recommendation) => recommendation
+            && Number.isInteger(recommendation.id) && recommendation.id > 0
+            && ["movie", "tv"].includes(recommendation.media_type));
+        if (!cards.length) return 0;
+
         const list = document.createElement("div");
         list.className = "chat-recommendations";
         container.append(list);
 
-        recommendations.slice(0, 10).forEach((recommendation) => {
-            if (!recommendation || !Number.isInteger(Number(recommendation.id))
-                || !["movie", "tv"].includes(recommendation.media_type)) return;
+        cards.forEach((recommendation) => {
             const card = document.createElement("article");
             card.className = "chat-movie-card";
             const poster = document.createElement("div");
@@ -204,6 +211,7 @@ export function createChat({ page, messages, welcome, form, input, micButton, vo
                 poster.setAttribute("aria-label", "Poster unavailable");
             }
         });
+        return cards.length;
     }
 
     function formatContextMessage(message, includeSpeaker = true, maxTextLength = Number.POSITIVE_INFINITY) {

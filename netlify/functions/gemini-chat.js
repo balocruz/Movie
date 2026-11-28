@@ -494,6 +494,16 @@ function normalizeSearchText(value) {
         .replace(/[^a-z0-9]/g, "");
 }
 
+function normalizeRecommendationWords(value) {
+    return String(value || "")
+        .normalize("NFKD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, " ")
+        .trim()
+        .replace(/\s+/g, " ");
+}
+
 function getTitleName(item, mediaType) {
     return mediaType === "tv" ? item.name || item.title || "" : item.title || item.name || "";
 }
@@ -1562,6 +1572,13 @@ function getRecommendationCandidates(research, preferences) {
     const candidateKeys = new Set(candidateTasks.flatMap((task) => task.kind === "discover"
         ? (task.groups || []).flatMap((group) => group.item_keys || [])
         : task.item_keys || []));
+    const similarityRanks = new Map();
+    research.tasks
+        .filter((task) => ["similar", "library_similar"].includes(task.kind)
+            && !task.ambiguous && !task.not_found && !task.year_not_found)
+        .forEach((task) => (task.item_keys || []).forEach((key, index) => {
+            if (!similarityRanks.has(key) || index < similarityRanks.get(key)) similarityRanks.set(key, index);
+        }));
     if (!candidateTasks.length) {
         research.tasks.filter((task) => task.kind === "search")
             .forEach((task) => (task.item_keys || []).forEach((key) => candidateKeys.add(key)));
@@ -1576,18 +1593,18 @@ function getRecommendationCandidates(research, preferences) {
         ? new Set(preferences.libraryContext?.watched.map((item) => itemKey(item)) || [])
         : new Set();
     const keywords = [...new Set(candidateTasks.flatMap((task) => task.keywords || []))]
-        .map((keyword) => normalizeSearchText(keyword))
+        .map((keyword) => normalizeRecommendationWords(keyword))
         .filter((keyword) => keyword.length > 2);
     const stopWords = new Set(["about", "after", "before", "from", "into", "like", "more", "movie", "movies", "show", "shows", "story", "stories", "with"]);
     const scoreRelevance = (item) => {
-        const searchableText = normalizeSearchText(`${item.title || item.name || ""} ${item.overview || ""}`);
+        const searchableText = normalizeRecommendationWords(`${item.title || item.name || ""} ${item.overview || ""}`);
         const searchableWords = new Set(searchableText.split(/\s+/).filter(Boolean));
         return keywords.reduce((score, keyword) => {
-            if (searchableText.includes(keyword)) return score + 3;
             const meaningfulWords = keyword.split(/\s+/).filter((word) => word.length > 2 && !stopWords.has(word));
             if (!meaningfulWords.length) return score;
+            if (` ${searchableText} `.includes(` ${keyword} `)) return score + 3;
             const matched = meaningfulWords.filter((word) => searchableWords.has(word)).length;
-            return score + (matched / meaningfulWords.length) * 1.5;
+            return score + (matched / meaningfulWords.length) * 2;
         }, 0);
     };
 
@@ -1597,9 +1614,19 @@ function getRecommendationCandidates(research, preferences) {
         && matchesRecommendationPreferences(item, preferences)
         && (!verifiedKeywordTasks.length || keywordFilteredKeys.has(itemKey(item)))
         && !watchedIds.has(itemKey(item))
-    ).sort((left, right) => scoreRelevance(right) - scoreRelevance(left)
-        || Number(right.popularity || 0) - Number(left.popularity || 0)
-        || Number(right.vote_count || 0) - Number(left.vote_count || 0));
+    ).sort((left, right) => {
+        const leftSimilarityRank = similarityRanks.get(itemKey(left));
+        const rightSimilarityRank = similarityRanks.get(itemKey(right));
+        if (leftSimilarityRank !== undefined || rightSimilarityRank !== undefined) {
+            if (leftSimilarityRank === undefined) return 1;
+            if (rightSimilarityRank === undefined) return -1;
+            if (leftSimilarityRank !== rightSimilarityRank) return leftSimilarityRank - rightSimilarityRank;
+        }
+        const relevanceDifference = scoreRelevance(right) - scoreRelevance(left);
+        if (relevanceDifference) return relevanceDifference;
+        return Number(right.popularity || 0) - Number(left.popularity || 0)
+            || Number(right.vote_count || 0) - Number(left.vote_count || 0);
+    });
 }
 
 async function researchTmdb(tasks, accessToken, preferences, libraryContext) {
@@ -1657,6 +1684,52 @@ function validateRecommendations(recommendations, registry, preferences) {
     return selected;
 }
 
+function mentionedVerifiedRecommendations(reply, candidates, limit) {
+    const normalizedReply = ` ${normalizeRecommendationWords(reply)} `;
+    return candidates
+        .map((item) => ({
+            item,
+            title: normalizeRecommendationWords(item.title || item.name || "")
+        }))
+        .filter(({ title }) => title.length >= 4 && normalizedReply.includes(` ${title} `))
+        .sort((left, right) => normalizedReply.indexOf(` ${left.title} `) - normalizedReply.indexOf(` ${right.title} `))
+        .slice(0, limit)
+        .map(({ item }) => ({ ...item, reason: "" }));
+}
+
+function finalizeRecommendations(reply, answerRecommendations, candidates, preferences, registry) {
+    if (!preferences.wantsRecommendations) return { reply, recommendations: [] };
+
+    const limit = Math.min(MAX_RECOMMENDATIONS, preferences.requestedCount);
+    const recommendations = validateRecommendations(answerRecommendations, registry, preferences);
+    const mentioned = mentionedVerifiedRecommendations(reply, candidates, limit);
+    const selected = recommendations.length ? [...recommendations] : mentioned;
+    const selectedKeys = new Set(selected.map((item) => itemKey(item)));
+    for (const candidate of candidates) {
+        if (selected.length >= limit) break;
+        const key = itemKey(candidate);
+        if (!selectedKeys.has(key)) {
+            selected.push({ ...candidate, reason: "" });
+            selectedKeys.add(key);
+        }
+    }
+    if (selected.length) {
+        const response = !recommendations.length && !mentioned.length
+            ? "These verified titles are the closest matches I found for your request:"
+            : reply;
+        return { reply: response, recommendations: selected };
+    }
+
+    const promisesResults = /\b(?:here\s+(?:are|is)|below\b|(?:i(?:'ve| have| will|'ll)\s+)?(?:picked|selected|found|curated|put together|pulled)\s+(?:these|a few|some|the)|(?:i(?:'ll| will)\s+(?:show|recommend|suggest))|(?:my|top)\s+picks|you might (?:like|enjoy)|take a look at)\b/i.test(reply);
+    if (!candidates.length && promisesResults) {
+        return {
+            reply: "I couldn’t verify suitable titles for that request in the MoviesHub catalogue, so I don’t have recommendations to show. Try a broader genre or loosen one of the filters.",
+            recommendations: []
+        };
+    }
+    return { reply, recommendations: [] };
+}
+
 async function buildMayaResponse({ apiKey, tmdbToken, contents, summary, libraryContext }) {
     const latestPrompt = getLatestUserText(contents);
     const requestLibraryContext = explicitlyRequestsLibraryPersonalization(latestPrompt) ? libraryContext : null;
@@ -1669,7 +1742,7 @@ async function buildMayaResponse({ apiKey, tmdbToken, contents, summary, library
     preferences.excludeWatched = preferences.excludeWatched && Boolean(requestLibraryContext?.excludeWatched);
     const answerSettings = getAnswerSettings(latestPrompt);
     if (preferences.wantsRecommendations) {
-        answerSettings.instruction += ` The user requested ${preferences.requestedCount} recommendations. Prioritize close matches to the request's premise and mood over popularity. Return ${preferences.requestedCount} distinct cards when that many strong candidates are supplied; do not stop early if qualified candidates remain. If fewer candidates genuinely fit, return only those and say briefly that the verified set was smaller. Each card reason must connect a concrete detail in its TMDB title/overview/genres to the request; do not invent plot details.`;
+        answerSettings.instruction += ` The user requested ${preferences.requestedCount} recommendations. Prioritize semantic fit to the complete request—premise, tone, themes and constraints—over popularity or a loose keyword match. For "similar to" requests, treat TMDB similarity results as a relevance signal and compare their overviews before choosing. Return ${preferences.requestedCount} distinct cards when that many strong candidates are supplied; do not stop early if qualified candidates remain. If fewer candidates genuinely fit, return only those and say briefly that the verified set was smaller. Each card reason must connect a concrete detail in its TMDB title, overview or genres to the request; do not invent plot details. Any title named in the reply as a recommendation must also appear in the returned cards.`;
     }
     const requestContents = addLibraryContextToContents(contents, requestLibraryContext);
     const researchResponse = await callGemini({ apiKey, contents: requestContents, summary, useResearchTool: true });
@@ -1791,14 +1864,13 @@ async function buildMayaResponse({ apiKey, tmdbToken, contents, summary, library
         });
         reply = `${reply.trim()}\n\nSources\n${sourceLinks.join("\n")}`;
     }
-    return {
+    return finalizeRecommendations(
         reply,
-        recommendations: validateRecommendations(
-            answer.recommendations,
-            new Map(recommendationCandidates.map((item) => [itemKey(item), item])),
-            preferences
-        )
-    };
+        answer.recommendations,
+        recommendationCandidates,
+        preferences,
+        new Map(recommendationCandidates.map((item) => [itemKey(item), item]))
+    );
 }
 
 exports.handler = async (event) => {

@@ -221,6 +221,7 @@ genreButtons.forEach((button) => {
             genre.classList.toggle("active", selected);
             genre.setAttribute("aria-pressed", String(selected));
         });
+        button.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
         if (player.isPlaying()) player.minimize();
         if (button.dataset.genre === "all") catalog.loadHome();
         else catalog.loadGenre(button.dataset.movieGenre, button.dataset.tvGenre, button.textContent.trim());
@@ -279,5 +280,5 @@ document.addEventListener("keydown", (event) => {
 });
 
 window.setTimeout(dismissLoading, 10000);
-catalog.loadHome().finally(dismissLoading);
+catalog.loadHome();
 window.setTimeout(() => void checkForAppUpdate(), 1400);

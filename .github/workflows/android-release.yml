@@ -9,7 +9,7 @@ on:
       release_version:
         description: Release version (without the leading v)
         required: true
-        default: '1.0.7'
+        default: '1.2.0'
         type: string
 
 permissions:

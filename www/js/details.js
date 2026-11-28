@@ -65,9 +65,12 @@ export function createDetails({ page, browseContent, genreBar, onBack, onPlay, o
         entries.filter(([, value]) => value).forEach(([label, value]) => {
             const term = document.createElement("dt");
             const description = document.createElement("dd");
+            const fact = document.createElement("div");
+            fact.className = "detail-fact";
             term.textContent = label;
             description.textContent = value;
-            facts.append(term, description);
+            fact.append(term, description);
+            facts.appendChild(fact);
         });
     }
 
