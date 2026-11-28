@@ -59,6 +59,38 @@ function appendReleaseNotes(container, body) {
     });
 }
 
+function configureUpdateDownload() {
+    const downloadLink = document.getElementById("app-update-download");
+    if (!downloadLink) return;
+
+    downloadLink.addEventListener("click", async (event) => {
+        const capacitor = window.Capacitor;
+        if (capacitor?.getPlatform?.() !== "android") return;
+
+        event.preventDefault();
+        const url = downloadLink.href;
+        const launcher = capacitor.Plugins?.AppLauncher;
+        try {
+            const result = launcher?.openUrl
+                ? await launcher.openUrl({ url })
+                : typeof capacitor.nativePromise === "function"
+                    ? await capacitor.nativePromise("AppLauncher", "openUrl", { url })
+                    : null;
+            if (result?.completed) {
+                document.getElementById("app-update-dialog")?.close();
+                return;
+            }
+        } catch (error) {
+            console.warn("Could not open the APK download in the device browser.", error);
+        }
+
+        // Keep a direct fallback for devices where the native launcher is unavailable.
+        window.location.assign(url);
+    });
+}
+
+configureUpdateDownload();
+
 export async function checkForAppUpdate() {
     const capacitor = window.Capacitor;
     if (capacitor?.getPlatform?.() !== "android") return;
