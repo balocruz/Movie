@@ -41,6 +41,21 @@ jobs:
       - name: Install Node dependencies
         run: npm ci
 
+      - name: Apply speech plugin compatibility fix for AGP 9
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs');
+          const path = 'node_modules/@capacitor-community/speech-recognition/android/build.gradle';
+          const source = fs.readFileSync(path, 'utf8');
+          const legacy = "proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'";
+          const supported = "proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'";
+          if (source.includes(legacy)) {
+            fs.writeFileSync(path, source.replace(legacy, supported));
+          } else if (!source.includes(supported)) {
+            throw new Error('Unexpected speech-recognition ProGuard configuration; review the plugin before building.');
+          }
+          NODE
+
       - name: Generate web and Android configuration
         run: npm run build:config
         env:
