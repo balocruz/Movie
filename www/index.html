@@ -160,13 +160,13 @@
         </section>
 
         <section id="chat-page" class="chat-page" aria-labelledby="chat-heading" hidden>
-            <h2 id="chat-heading" class="visually-hidden">Maya, your personal Movie and TV Assistant from MoviesHub</h2>
+            <h2 id="chat-heading" class="visually-hidden">Maya, your Movie and TV Assistant</h2>
             <div id="chat-messages" class="chat-messages" role="log" aria-live="polite" aria-relevant="additions">
                 <div id="chat-welcome" class="chat-welcome">
                     <span class="chat-welcome-mark" aria-hidden="true">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.8 14.7 9l6.5 2.8-6.5 2.7-2.7 6.7-2.7-6.7L2.8 11.8 9.3 9z"></path><path d="m19 2 .8 1.8 1.7.7-1.7.8L19 7l-.8-1.7-1.7-.8 1.7-.7z"></path></svg>
                     </span>
-                    <h3>Maya, your personal Movie and TV Assistant from MoviesHub.</h3>
+                    <h3>Maya, your Movie and TV Assistant.</h3>
                     <p>Tell Maya what you enjoy or ask about a movie or show.</p>
                 </div>
             </div>
@@ -223,6 +223,20 @@
             </svg>
         </button>
     </section>
+
+    <dialog id="app-update-dialog" class="app-update-dialog" aria-labelledby="app-update-title" aria-describedby="app-update-version">
+        <div class="app-update-dialog-content">
+            <button id="app-update-close" class="app-update-close" type="button" aria-label="Close update message">×</button>
+            <p class="app-update-eyebrow">MOVIESHUB UPDATE</p>
+            <h2 id="app-update-title">A new version is ready</h2>
+            <p id="app-update-version" class="app-update-version"></p>
+            <div id="app-update-notes" class="app-update-notes"></div>
+            <div class="app-update-actions">
+                <button id="app-update-later" class="app-update-later" type="button">Later</button>
+                <a id="app-update-download" class="app-update-download" href="#" target="_blank" rel="noopener noreferrer">Download update</a>
+            </div>
+        </div>
+    </dialog>
 
     <script type="module" src="js/app.js"></script>
 </body>

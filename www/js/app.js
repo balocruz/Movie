@@ -5,6 +5,7 @@ import { createFeaturedHero } from "./hero.js";
 import { createLibrary } from "./library.js";
 import { createPlayer } from "./player.js";
 import { createSearch } from "./search.js";
+import { checkForAppUpdate } from "./updates.js";
 
 const browseContent = document.getElementById("browse-content");
 const genreBar = document.getElementById("genre-bar");
@@ -279,3 +280,4 @@ document.addEventListener("keydown", (event) => {
 
 window.setTimeout(dismissLoading, 10000);
 catalog.loadHome().finally(dismissLoading);
+window.setTimeout(() => void checkForAppUpdate(), 1400);

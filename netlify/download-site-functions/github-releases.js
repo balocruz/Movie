@@ -1,5 +1,21 @@
 const RELEASES_URL = 'https://api.github.com/repos/balocruz/Movie/releases?per_page=20';
 const LATEST_RELEASE_URL = 'https://api.github.com/repos/balocruz/Movie/releases/latest';
+const ALLOWED_ORIGINS = new Set(['https://localhost', 'capacitor://localhost']);
+
+function responseHeaders(origin, cacheControl = 'no-store') {
+  const headers = {
+    'Content-Type': 'application/json; charset=utf-8',
+    'Cache-Control': cacheControl,
+    'Vary': 'Origin'
+  };
+  if (ALLOWED_ORIGINS.has(origin)) {
+    headers['Access-Control-Allow-Origin'] = origin;
+    headers['Access-Control-Allow-Methods'] = 'GET, OPTIONS';
+    headers['Access-Control-Allow-Headers'] = 'Accept, Content-Type';
+    headers['Access-Control-Max-Age'] = '86400';
+  }
+  return headers;
+}
 
 function githubHeaders() {
   return {
@@ -9,7 +25,18 @@ function githubHeaders() {
   };
 }
 
-exports.handler = async function () {
+exports.handler = async function (event) {
+  const origin = event?.headers?.origin || event?.headers?.Origin || '';
+  if (origin && !ALLOWED_ORIGINS.has(origin)) {
+    return { statusCode: 403, headers: responseHeaders(''), body: JSON.stringify({ error: 'Origin not allowed.' }) };
+  }
+  if (event?.httpMethod === 'OPTIONS') {
+    return { statusCode: 204, headers: responseHeaders(origin), body: '' };
+  }
+  if (event?.httpMethod && event.httpMethod !== 'GET') {
+    return { statusCode: 405, headers: responseHeaders(origin), body: JSON.stringify({ error: 'Method not allowed.' }) };
+  }
+
   let upstream;
   let latest;
   try {
@@ -20,7 +47,7 @@ exports.handler = async function () {
   } catch {
     return {
       statusCode: 502,
-      headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' },
+      headers: responseHeaders(origin),
       body: JSON.stringify({ error: 'GitHub release information is temporarily unavailable.' })
     };
   }
@@ -28,7 +55,7 @@ exports.handler = async function () {
   if (!upstream.ok) {
     return {
       statusCode: upstream.status === 403 ? 503 : 502,
-      headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' },
+      headers: responseHeaders(origin),
       body: JSON.stringify({
         error: upstream.status === 403
           ? 'GitHub temporarily rate limited release requests. Please try again shortly.'
@@ -46,8 +73,7 @@ exports.handler = async function () {
   return {
     statusCode: 200,
     headers: {
-      'Content-Type': 'application/json; charset=utf-8',
-      'Cache-Control': 'public, max-age=300',
+      ...responseHeaders(origin, 'public, max-age=300'),
       'Netlify-CDN-Cache-Control': 'public, durable, max-age=300, stale-while-revalidate=300'
     },
     body: JSON.stringify(orderedReleases)

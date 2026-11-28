@@ -18,6 +18,7 @@ export function createChat({ page, messages, welcome, form, input, micButton, vo
     let isVoiceStarting = false;
     let isBusy = false;
     let activeSpeechButton = null;
+    let activeSpeechMode = null;
     let speechGeneration = 0;
 
     function appendInlineText(container, text) {
@@ -332,6 +333,17 @@ export function createChat({ page, messages, welcome, form, input, micButton, vo
         return null;
     }
 
+    function getNativeTextToSpeechBridge() {
+        const capacitor = window.Capacitor;
+        if (!capacitor?.isNativePlatform?.()) return null;
+        const plugin = capacitor.Plugins?.TextToSpeech;
+        if (plugin) return { call: (method, options = {}) => plugin[method](options) };
+        if (typeof capacitor.nativePromise === "function") {
+            return { call: (method, options = {}) => capacitor.nativePromise("TextToSpeech", method, options) };
+        }
+        return null;
+    }
+
     async function startNativeVoiceInput(bridge) {
         const availability = await bridge.call("available");
         if (!availability?.available) throw new Error("unavailable");
@@ -349,7 +361,7 @@ export function createChat({ page, messages, welcome, form, input, micButton, vo
             language: navigator.language || "en-US",
             maxResults: 1,
             partialResults: false,
-            popup: true
+            popup: false
         });
         setRecordingState(false);
         const transcript = Array.isArray(result?.matches) ? result.matches[0] : "";
@@ -514,8 +526,12 @@ export function createChat({ page, messages, welcome, form, input, micButton, vo
         if (activeSpeechButton) {
             speechGeneration++;
             window.speechSynthesis?.cancel();
+            if (activeSpeechMode === "native") {
+                void getNativeTextToSpeechBridge()?.call("stop").catch(() => {});
+            }
             setSpeechButtonState(activeSpeechButton, false);
             activeSpeechButton = null;
+            activeSpeechMode = null;
         }
         if (voiceStatus?.dataset.state === "speaking") setVoiceStatus("");
     }
@@ -525,8 +541,9 @@ export function createChat({ page, messages, welcome, form, input, micButton, vo
         button.type = "button";
         button.className = "chat-speak-button";
         setSpeechButtonState(button, false);
-        if (!window.speechSynthesis || typeof window.speechSynthesis.speak !== "function"
-            || typeof SpeechSynthesisUtterance === "undefined") {
+        const hasBrowserSpeech = window.speechSynthesis && typeof window.speechSynthesis.speak === "function"
+            && typeof SpeechSynthesisUtterance !== "undefined";
+        if (!getNativeTextToSpeechBridge() && !hasBrowserSpeech) {
             button.disabled = true;
             button.setAttribute("aria-label", "Speech playback unavailable");
             button.title = "Speech playback isn't supported in this browser.";
@@ -545,44 +562,97 @@ export function createChat({ page, messages, welcome, form, input, micButton, vo
                 .replace(/^\s*[-*]\s+/gm, "")
                 .replace(/[*_`]/g, "")
                 .trim();
-            const utterance = new SpeechSynthesisUtterance(plainText);
             const currentGeneration = speechGeneration;
             activeSpeechButton = button;
             setSpeechButtonState(button, true);
             setVoiceStatus("Preparing Maya's voice…", "processing");
-            utterance.onend = () => {
-                if (speechGeneration !== currentGeneration) return;
-                activeSpeechButton = null;
-                setSpeechButtonState(button, false);
-                setVoiceStatus("");
-            };
-            utterance.onerror = () => {
-                if (speechGeneration !== currentGeneration) return;
-                activeSpeechButton = null;
-                setSpeechButtonState(button, false);
-                setVoiceStatus("Speech playback couldn't start. You can still read the response.", "error");
-            };
+            let failed = false;
             try {
-                const mayaVoice = await getMayaVoiceForSpeech();
-                if (speechGeneration !== currentGeneration) return;
-                if (mayaVoice) {
-                    utterance.voice = mayaVoice;
-                    utterance.lang = mayaVoice.lang;
+                const nativeTts = getNativeTextToSpeechBridge();
+                if (nativeTts) {
+                    activeSpeechMode = "native";
+                    try {
+                        const supported = await nativeTts.call("getSupportedVoices");
+                        if (speechGeneration !== currentGeneration) return;
+                        const voices = Array.isArray(supported?.voices) ? supported.voices : [];
+                        const voiceIndex = findNativeMayaVoiceIndex(voices, navigator.language || "en-US");
+                        const voice = voiceIndex >= 0 ? voices[voiceIndex] : null;
+                        const options = {
+                            text: plainText,
+                            lang: voice?.lang || navigator.language || "en-US",
+                            rate: 1.03,
+                            pitch: 1.12,
+                            volume: 1
+                        };
+                        if (voiceIndex >= 0) options.voice = voiceIndex;
+                        setVoiceStatus("Maya is speaking. Tap the speaker to stop.", "speaking");
+                        await nativeTts.call("speak", options);
+                    } catch (nativeError) {
+                        if (speechGeneration !== currentGeneration) return;
+                        if (!hasBrowserSpeech) throw nativeError;
+                        activeSpeechMode = "browser";
+                        await speakWithBrowser(plainText, currentGeneration);
+                    }
                 } else {
-                    utterance.lang = navigator.language || "en-US";
+                    activeSpeechMode = "browser";
+                    await speakWithBrowser(plainText, currentGeneration);
                 }
-                utterance.pitch = 1.08;
-                utterance.rate = 1.02;
-                utterance.volume = 1;
-                setVoiceStatus("Maya is speaking. Tap the speaker to stop.", "speaking");
-                window.speechSynthesis.speak(utterance);
             } catch {
-                activeSpeechButton = null;
-                setSpeechButtonState(button, false);
+                failed = true;
                 setVoiceStatus("Speech playback couldn't start. You can still read the response.", "error");
+            } finally {
+                if (speechGeneration === currentGeneration) {
+                    activeSpeechButton = null;
+                    activeSpeechMode = null;
+                    setSpeechButtonState(button, false);
+                    if (!failed) setVoiceStatus("");
+                }
             }
         });
         return button;
+    }
+
+    function findNativeMayaVoiceIndex(voices, preferredLanguage) {
+        if (!Array.isArray(voices) || !voices.length) return -1;
+        const locale = String(preferredLanguage || "en-US").toLowerCase();
+        const language = locale.split("-")[0];
+        const feminine = /female|woman|aria|ava|samantha|jenny|zira|karen|moira|tessa|victoria|susan|serena|fiona|salli|joanna|kendra|kimberly|ivy|michelle|ana|sophia|claire/i;
+        const masculine = /(?:^|[^a-z])(?:male|man)(?:$|[^a-z])|david|daniel|alex|fred|james|thomas|guy|mark|richard|oliver/i;
+        const score = (voice) => {
+            const voiceLanguage = String(voice?.lang || "").toLowerCase();
+            const name = `${voice?.name || ""} ${voice?.voiceURI || ""}`;
+            return (feminine.test(name) ? 100 : 0)
+                + (voiceLanguage === locale ? 30 : voiceLanguage.startsWith(`${language}-`) ? 20 : 0)
+                + (voice?.default ? 1 : 0)
+                - (masculine.test(name) ? 150 : 0);
+        };
+        const preferred = voices.map((voice, index) => ({ voice, index }))
+            .filter(({ voice }) => feminine.test(`${voice?.name || ""} ${voice?.voiceURI || ""}`))
+            .sort((left, right) => score(right.voice) - score(left.voice))[0];
+        if (preferred) return preferred.index;
+        return voices.map((voice, index) => ({ voice, index }))
+            .filter(({ voice }) => !masculine.test(`${voice?.name || ""} ${voice?.voiceURI || ""}`))
+            .sort((left, right) => score(right.voice) - score(left.voice))[0]?.index ?? 0;
+    }
+
+    async function speakWithBrowser(text, generation) {
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = navigator.language || "en-US";
+        utterance.pitch = 1.08;
+        utterance.rate = 1.02;
+        utterance.volume = 1;
+        const mayaVoice = await getMayaVoiceForSpeech();
+        if (generation !== speechGeneration) return;
+        if (mayaVoice) {
+            utterance.voice = mayaVoice;
+            utterance.lang = mayaVoice.lang;
+        }
+        setVoiceStatus("Maya is speaking. Tap the speaker to stop.", "speaking");
+        await new Promise((resolve, reject) => {
+            utterance.onend = resolve;
+            utterance.onerror = reject;
+            window.speechSynthesis.speak(utterance);
+        });
     }
 
     function appendMessage(text, role, recommendations = [], extraClass = "") {

@@ -76,6 +76,8 @@ h1, h2, h3, p { margin-top: 0; }
 .release-card-version strong { color: var(--accent-bright); font: 600 25px 'Manrope',sans-serif; }
 .release-card-body h3 { margin: 0 0 11px; font: 600 17px 'Manrope',sans-serif; }
 .release-notes { color: var(--muted); font-size: 12px; line-height: 1.8; }
+.release-note-group + .release-note-group { margin-top: 19px; }
+.release-note-group h3 { margin: 0 0 6px; color: var(--ink); font: 600 13px 'Manrope',sans-serif; }
 .release-notes ul { margin: 0; padding-left: 17px; }
 .release-notes li + li { margin-top: 3px; }
 .release-link { align-self: center; color: var(--accent-bright); text-decoration: none; font-size: 11px; white-space: nowrap; }

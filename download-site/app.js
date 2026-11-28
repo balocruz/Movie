@@ -12,9 +12,24 @@ function formatSize(bytes) {
   return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
 }
 function renderNotes(body) {
-  const lines = (body || fallbackNotes).split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
-  const items = lines.map((line) => line.replace(/^[-*]\s*/, '')).filter(Boolean);
-  return `<ul>${items.map((line) => `<li>${escapeHTML(line)}</li>`).join('')}</ul>`;
+  const groups = [];
+  let current = { title: "What's new", items: [] };
+  groups.push(current);
+  (body || fallbackNotes).split(/\r?\n/).forEach((rawLine) => {
+    const line = rawLine.trim();
+    if (!line) return;
+    const heading = line.match(/^#{1,3}\s+(.+)$/);
+    if (heading) {
+      current = { title: heading[1].replace(/[*_`]/g, '').trim(), items: [] };
+      groups.push(current);
+      return;
+    }
+    const item = line.replace(/^[-*+]\s+/, '').replace(/^\d+[.)]\s+/, '').trim();
+    if (item) current.items.push(item);
+  });
+  const populated = groups.filter((group) => group.items.length);
+  if (!populated.length) populated.push({ title: "What's new", items: [fallbackNotes] });
+  return populated.map((group) => `<section class="release-note-group"><h3>${escapeHTML(group.title)}</h3><ul>${group.items.map((item) => `<li>${escapeHTML(item)}</li>`).join('')}</ul></section>`).join('');
 }
 async function releaseNotesFor(release) {
   try {
@@ -70,7 +85,7 @@ async function loadReleases() {
     document.querySelector('#version').textContent = 'Couldn’t load the latest version';
     document.querySelector('#download-label').textContent = 'Download unavailable right now';
     document.querySelector('#release-meta').textContent = 'We couldn’t load the latest release. Try again shortly.';
-    document.querySelector('#release-title').textContent = 'Release notes unavailable';
+    document.querySelector('#release-title').textContent = "What's new is unavailable";
     document.querySelector('#release-notes').textContent = 'Please refresh the page in a little while.';
     document.querySelector('#release-list').innerHTML = '<p class="muted">We couldn’t load previous versions. Try again shortly.</p>';
   }
